@@ -37,11 +37,11 @@ def load_dot_env(verbose=0):
 if __name__ == '__main__':
     load_dot_env()
 
-    rstud_snips = os.listdir(os.environ["RSTUDIO_SNINPPETS_PATH"])
+    rstud_snips = os.listdir(os.environ["RSTUDIO_SNIPPETS_PATH"])
     local_snips = list(filter(lambda fn: fn.endswith(".snippets"), os.listdir(".")))
     for fn in local_snips:
         print("Copying local `%s`" % fn)
-        dest_fp = os.path.join(os.environ["RSTUDIO_SNINPPETS_PATH"], fn)
+        dest_fp = os.path.join(os.environ["RSTUDIO_SNIPPETS_PATH"], fn)
         src_fp = fn        
         if fn in rstud_snips:
             print("* making backup (`%s`)" % dest_fp + ".bak")

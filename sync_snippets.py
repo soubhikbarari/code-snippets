@@ -10,12 +10,12 @@ Runtime: a few seconds
 
 Input:
 - config.env:
-    - must have `SUBLIME_SNIPPETS_PATH` and `RSTUDIO_SNINPPETS_PATH` variables set
-    - `RSTUDIO_SNINPPETS_PATH` is usually by default `~/.config/rstudio/snippets/`
+    - must have `SUBLIME_SNIPPETS_PATH` and `RSTUDIO_SNIPPETS_PATH` variables set
+    - `RSTUDIO_SNIPPETS_PATH` is usually by default `~/.config/rstudio/snippets/`
 
 Output:
 - `SUBLIME_SNIPPETS_PATH` populated with new `.sublime-snippet` files
-- `RSTUDIO_SNINPPETS_PATH` populated with new `.snippets` files
+- `RSTUDIO_SNIPPETS_PATH` populated with new `.snippets` files
 """
 
 ## --------------------------------------------------------
@@ -175,7 +175,7 @@ def get_directory_rsnippets(dir_path):
     return(rstd_snips)
 
 def get_rstudio_snippets():
-    return(get_directory_rsnippets(os.environ["RSTUDIO_SNINPPETS_PATH"]))
+    return(get_directory_rsnippets(os.environ["RSTUDIO_SNIPPETS_PATH"]))
 
 def backup_snippets(subl_snips, rstd_snips):
     bak_dirpath = os.path.join(os.path.dirname(os.path.realpath(__file__)), "backups")
@@ -190,12 +190,12 @@ def backup_snippets(subl_snips, rstd_snips):
 
 def backup_curr_rstudio_snippets():
     print("\nBacking up current R Studio snippet files"); time.sleep(0.5)
-    rstd_snip_files = os.listdir(os.environ["RSTUDIO_SNINPPETS_PATH"])
+    rstd_snip_files = os.listdir(os.environ["RSTUDIO_SNIPPETS_PATH"])
     for srcfile in rstd_snip_files:
         if srcfile.endswith(".snippets"):
             print("* " + srcfile)            
             destfile = srcfile
-            os.system('cp %s %s' % (os.path.join(os.environ["RSTUDIO_SNINPPETS_PATH"], srcfile), destfile))
+            os.system('cp %s %s' % (os.path.join(os.environ["RSTUDIO_SNIPPETS_PATH"], srcfile), destfile))
 
 def combine_snippets(subl_snips, rstd_snips):
     ## recategorize snippets from blank section if possible
@@ -242,9 +242,9 @@ def combine_snippets(subl_snips, rstd_snips):
 
 def save_rstudio_snippets(rstd_snips):
     ## write new snippet files
-    print("\nSaving new R Studio snippets to `%s`" % os.environ["RSTUDIO_SNINPPETS_PATH"]); time.sleep(0.5)
+    print("\nSaving new R Studio snippets to `%s`" % os.environ["RSTUDIO_SNIPPETS_PATH"]); time.sleep(0.5)
     for l in rstd_snips.keys():
-        rstd_snip_fpath = os.path.join(os.environ["RSTUDIO_SNINPPETS_PATH"], l)
+        rstd_snip_fpath = os.path.join(os.environ["RSTUDIO_SNIPPETS_PATH"], l)
         print("* " + rstd_snip_fpath)
         with open(rstd_snip_fpath, "w") as fp:
             for s in rstd_snips[l].keys():

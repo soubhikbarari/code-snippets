@@ -37,10 +37,10 @@ def load_dot_env(verbose=0):
 if __name__ == '__main__':
     load_dot_env()
 
-    rstud_snips = os.listdir(os.environ["RSTUDIO_SNINPPETS_PATH"])
+    rstud_snips = os.listdir(os.environ["RSTUDIO_SNIPPETS_PATH"])
     for fn in rstud_snips:
         print("Copying R Studio's `%s`" % fn)
-        src_fp = os.path.join(os.environ["RSTUDIO_SNINPPETS_PATH"], fn)
+        src_fp = os.path.join(os.environ["RSTUDIO_SNIPPETS_PATH"], fn)
         dest_fp = dest_fp        
         if os.path.exists(dest_fp):
             print("* making backup (`%s`)" % dest_fp + ".bak")            
