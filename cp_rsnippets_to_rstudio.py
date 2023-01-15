@@ -37,12 +37,13 @@ def load_dot_env(verbose=0):
 if __name__ == '__main__':
     load_dot_env()
 
+    local_dirpath = os.path.join(os.path.dirname(os.path.realpath(__file__)))
     rstud_snips = os.listdir(os.environ["RSTUDIO_SNIPPETS_PATH"])
-    local_snips = list(filter(lambda fn: fn.endswith(".snippets"), os.listdir(".")))
+    local_snips = list(filter(lambda fn: fn.endswith(".snippets"), os.listdir(local_dirpath)))
     for fn in local_snips:
         print("Copying local `%s`" % fn)
         dest_fp = os.path.join(os.environ["RSTUDIO_SNIPPETS_PATH"], fn)
-        src_fp = fn        
+        src_fp = os.path.join(local_dirpath, fn)
         if fn in rstud_snips:
             print("* making backup (`%s`)" % dest_fp + ".bak")
             os.rename(dest_fp, dest_fp + ".bak")
