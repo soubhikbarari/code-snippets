@@ -1,0 +1,526 @@
+
+
+##-------------------------------------
+## PANDAS
+##-------------------------------------
+
+
+snippet pandas chunkwise
+	chunksize = 10 ** 6
+	for chunk in pd.read_csv(filename, chunksize=chunksize):
+	    process(chunk)
+
+##-------------------------------------
+## VIZ
+##-------------------------------------
+
+
+snippet mpl figure
+	## Init figure
+	w, h = (8.5, 5)
+	fig = plt.figure(figsize=(w,h))
+	nrow, ncol = (1, 1)
+	gs1 = gs.GridSpec(nrow, ncol)
+	
+	fig.subplots_adjust(top=0.9, bottom=0.1, left=0.125, right=0.9, wspace=0.2, hspace=0.2)
+	ax0 = fig.add_subplot(gs1[0])
+
+snippet mpl header
+	import seaborn as sns
+	sns.set_style("white")
+	import matplotlib as mpl
+	import matplotlib.gridspec as gs
+	import matplotlib.patches as mpatches
+	import matplotlib.pyplot as plt
+
+##-------------------------------------
+## BAYESIAN
+##-------------------------------------
+
+
+snippet pystan example
+	import pystan
+	
+	schools_code = """
+	data {
+	    int<lower=0> J; // number of schools
+	    real y[J]; // estimated treatment effects
+	    real<lower=0> sigma[J]; // s.e. of effect estimates
+	}
+	parameters {
+	    real mu;
+	    real<lower=0> tau;
+	    real eta[J];
+	}
+	transformed parameters {
+	    real theta[J];
+	    for (j in 1:J)
+	    theta[j] = mu + tau * eta[j];
+	}
+	model {
+	    eta ~ normal(0, 1);
+	    y ~ normal(theta, sigma);
+	}
+	"""
+	
+	schools_dat = {'J': 8,
+	               'y': [28,  8, -3,  7, -1,  1, 18, 12],
+	               'sigma': [15, 10, 16, 11,  9, 11, 10, 18]}
+	
+	sm = pystan.StanModel(model_code=schools_code)
+	fit = sm.sampling(data=schools_dat, iter=1000, chains=4)
+	
+	a = fit.extract(permuted=False)
+	
+	print fit
+	fit.plot()
+
+##-------------------------------------
+## WEBSCRAPING
+##-------------------------------------
+
+
+snippet scraper attempts
+	import datetime as dt
+	import sys
+	from tqdm import tqdm
+	
+	sleep = True
+	attempts = 0
+	while True:
+	    try:
+	        attempts += 1
+	        $1 ## scraping code goes here 
+	        break
+	    except Exception as e:
+	    ## what to do when rate-limited
+	        print(e)
+	        print(str(dt.datetime.today()))
+	        print("\nAttempt %i failed..." % attempts)
+	        if sleep:
+	            _ = [time.sleep(1) for i in tqdm(range(60*60*6), desc="sleeping")]
+	        else:
+	            print("Options:\n")
+	            print("*type `continue` to try again")
+	            print("*type `skip` to skip")
+	            print("*try sleeping via `time.sleep()`")
+	            print("*exit via `sys.exit()`")
+	            print("*execute some other code")
+	            _input = input("\n>")
+	            if "continue" in _input or _input.strip() == None:
+	                continue
+	            if "skip" in _input:
+	                break
+	            else:
+	                try:
+	                    eval(_input+"\n")
+	                except Exception as e:
+	                    print(e)
+	                    continue
+
+snippet beautifulsoup
+	import requests
+	from bs4 import BeautifulSoup
+	
+	response = requests.get('http://paris.quel-institut-beaute.com')
+	soup = BeautifulSoup(response.content, 'lxml')
+	
+	# Find all tags with class 'ic'
+	stores = soup.select('.ic')
+	
+	# Find all tags with class 'ic' and print text
+	for div in soup.find_all("div", class_="ic"):
+	    print(div.get_text(strip=True))
+
+snippet selenium
+	from selenium import webdriver
+	from selenium.webdriver.common.keys import Keys
+	from selenium.webdriver.support import expected_conditions as EC
+	from selenium.webdriver.chrome.options import Options
+	from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
+	from selenium.webdriver.common.action_chains import ActionChains
+	
+	from webdriver_manager.chrome import ChromeDriverManager
+	
+	## helpers 
+	def scroll_down(driver, x = 5):
+	    html = driver.find_element_by_tag_name('html')
+	    for i in range(x):
+	        html.send_keys(Keys.PAGE_DOWN) 
+	
+	def click_on_element(driver, element, use_javascript = True):
+	    scroll_to_element(driver, element)
+	    if use_javascript:
+	        driver.execute_script("arguments[0].click();", element)
+	    else:
+	        ActionChains(driver).move_to_element(element).click().perform()
+	
+	def scroll_to_element(driver, element):
+	    desired_y = (element.size['height'] / 2) + element.location['y']
+	    window_h = driver.execute_script('return window.innerHeight')
+	    window_y = driver.execute_script('return window.pageYOffset')
+	    current_y = (window_h / 2) + window_y
+	    scroll_y_by = desired_y - current_y
+	    driver.execute_script("window.scrollBy(0, arguments[0]);", scroll_y_by)
+	
+	## objects
+	def FirefoxDriver(headless=1):
+	    gecko_path = "./geckodriver"
+	    binary = FirefoxBinary()
+	    if headless:
+	        binary.add_command_line_options('--headless')
+	        os.environ['MOZ_HEADLESS'] = '1'
+	    binary.add_command_line_options('--mute-audio')
+	    # _ = [time.sleep(t) for t in tqdm(list(range(1,5)))]
+	    return(webdriver.Firefox(executable_path=gecko_path, firefox_binary=binary, log_path="./geckodriver.log"))
+	
+	def ChromeDriver(headless=0):
+	    chrome_path = "./chromedriver"
+	    print("Running on Chrome")
+	    driver_options = Options()  
+	    driver_options.add_argument("--mute-audio") 
+	    driver_options.add_argument("--start-maximized")
+	    if headless:
+	        driver_options.add_argument('--headless')
+	    # return(webdriver.Chrome(executable_path=chrome_path, options=driver_options))
+	    return(webdriver.Chrome(ChromeDriverManager().install(), options=driver_options))
+	
+	## instantiate driver
+	# driver = FirefoxDriver(headless=1)
+	driver = ChromeDriver(headless=1)
+	driver.get(url)
+	
+	## example navigations
+	tabs = driver.find_elements_by_tag_name("tab")
+	my_tab = [tab for tab in tabs if tab.text == "My Tab"][0]
+	click_on_element(driver, my_tab)
+	
+	driver.find_element_by_id("my_id").text
+	
+	tabs = driver.find_elements_by_xpath('//div[@node-type="tab"]')
+	
+	while True:
+	    scroll_down(driver, 100) 
+	    time.sleep(3)
+	    all_info = driver.find_elements_by_id("info")
+
+##-------------------------------------
+## DEBUGGING
+##-------------------------------------
+
+
+snippet timedelta
+	import datetime as dt
+	
+	dt1 = dt.datetime.strptime(tstamp1, "%H:%M:%S.%f")
+	dt2 = dt.datetime.strptime(tstamp2, "%H:%M:%S.%f")
+	gap = (dt1 - dt2).total_seconds()
+
+snippet exitpoint
+	# EXITPOINT >>>>>>>>>>>
+	import sys; sys.exit(1)
+	# <<<<<<<<<<<<<<<<<<<<<
+
+snippet breakpoint
+	# BREAKPOINT >>>>>>>>>>
+	import pdb; pdb.set_trace()
+	# <<<<<<<<<<<<<<<<<<<<<
+	$0
+
+snippet pause
+	$0# PAUSE >>>>>>>>>>>>>>>>>>>>
+	import time; time.sleep(1)
+	# <<<<<<<<<<<<<<<<<<<<<<<<<<
+
+snippet globals
+	# =================================================
+	# ==================== GLOBALS ====================
+	# =================================================
+
+snippet todo
+	# TODO >>>>>>>>>>>>>>>>>>>>>>>>>>>
+	# $0
+	# <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+snippet section
+	## --------------------------------------------------------
+	## $1
+	## --------------------------------------------------------
+
+snippet comment
+	## --------------------------------------------------------
+	## $1 
+	## --------------------------------------------------------
+
+snippet title
+	# ============== $0 ==============
+
+snippet settings
+	# =================================================
+	# ==================== HELPERS ====================
+	# =================================================
+
+snippet main
+	# ==============================================
+	# ==================== MAIN ====================
+	# ==============================================
+
+snippet timer
+	import datetime as dt
+	time_start = dt.datetime.now() 
+	$1 # code here
+	time_elapsed = datetime.now() - time_start
+	print 'Time elpased (hh:mm:ss.ms) {}'.format(time_elapsed)
+
+snippet header
+	"""
+	Description of script.$1
+	
+	Author: Soubhik Barari
+	
+	Environment:
+	- must use Python 2.7
+	- must run on RCE
+	
+	Runtime:
+	- Xh for ~y lines of inputs on May 28, 2018
+	
+	Input:
+	- input.csv
+	
+	Output:
+	- output on xxx.harvard.edu
+	"""
+
+##-------------------------------------
+## SQL
+##-------------------------------------
+
+
+snippet hive header
+	SET hive.exec.compress.intermediate=true;
+	SET hive.exec.compress.output=false;
+	SET hive.execution.engine=mr;
+	SET hive.mapred.mode=nonstrict;
+	SET hive.cli.print.header=true;
+	SET hive.exec.dynamic.partition=true;
+	SET hive.exec.dynamic.partition.mode=nonstrict;
+	SET hive.enforce.bucketing = true;
+
+snippet pyspark jdbc
+	df = sqlContext.read.format('jdbc').options(url='jdbc:postgresql:dbserver', dbtable='schema.tablename').load()
+
+snippet hive bdrc header
+	--------------------------------
+	-- PRINCETON BD HIVEQL CONFIG --
+	--------------------------------
+	-- 6 data nodes, 4 service nodes
+	--
+	-- ===Memory===
+	-- 2.4  GB RAM/Head node
+	-- 10.7 GB RAM/Worker node
+	--
+	-- ===Total RAM===
+	-- 96  GB /Head node
+	-- 256 GB /Worker node
+	--------------------------------
+	
+	-- Print column names
+	SET hive.cli.print.header=true;
+	
+	-- Execution engine
+	SET hive.execution.engine=mr;
+	
+	-- Compress intermediate and output files
+	-- (Don't compress output if writing results out to file)
+	SET hive.exec.compress.intermediate=true;
+	SET hive.exec.compress.output=true;
+
+snippet ingest mysql
+	import threading
+	
+	MYSQL_USER = ""
+	MYSQL_PASS = ""
+	MYSQL_HOST = ""
+	MYSQL_NAME = ""
+	MYSQL_TBL  = ""
+	BASE_CMD   = "mysql %s -u%s -p%s -e " % (MYSQL_NAME, MYSQL_USER, MYSQL_PASS) + "'%s'"
+	FILE_PATHS = []
+	
+	def load_file(path_name):
+	    load_subcmd = 'LOAD DATA LOCAL INFILE "%s" INTO TABLE %s.%s FIELDS TERMINATED BY "\t" LINES TERMINATED BY "\n" IGNORE 1 LINES;' % (MYSQL_NAME, MYSQL_TBL, path_name)
+	    os.system(BASE_CMD % load_subcmd)
+	
+	# Create threads
+	thread_list = []
+	for file_path in FILE_PATHS:
+	    t = threading.Thread(target=load_file, args=[file_path])
+	    thread_list.append(t)
+	
+	# Begin threads
+	for thread in thread_list:
+	   thread.start()
+	 
+	# Clean up threads
+	for thread in thread_list:
+	   thread.join() 
+	
+	print("DONE.")
+
+##-------------------------------------
+## UNIX
+##-------------------------------------
+
+
+snippet screen
+	screen_cmd = "screen -dmS {1} bash -c '{2}'".format(name, cmd)
+	os.system(screen_cmd)
+
+##-------------------------------------
+## OTHER
+##-------------------------------------
+
+
+snippet secrets
+	## Import secrets
+	SECRETS_PATH = os.path.join(WD_PATH, "secrets")
+	sys.path.append(SECRETS_PATH)
+	
+	# from access import * ## access credentials
+
+snippet timestamp
+	TIMESTAMP_YMD = dt.datetime.today().strftime('%Y-%m-%d')
+	TIMESTAMP_UTC = dt.datetime.utcnow()
+	TIMESTAMP_ISO = dt.datetime.now().isoformat()
+	TIMESTAMP_SEC = time.time()
+
+snippet dropbox
+	import dropbox
+	
+	dbx = dropbox.Dropbox(DBX_ACCESS_TOKEN)
+	
+	## list files
+	db_dir = dbx.files_list_folder(db_dirpath, limit=2000)
+	db_dirfiles = [fn.name for fn in db_dir.entries]
+	while db_dir.has_more:
+		db_dir = dbx.files_list_folder_continue(list_result.cursor)
+		db_dirfiles += [fn.name for fn in db_dir.entries]
+	
+	## download
+	with open(local_fpath, "wb") as f:
+		metadata, res = dbx.files_download(db_fpath)
+		f.write(res.content)
+	
+	## upload
+	with open(local_fpath, "rb") as f:
+		dbx.files_upload(f.read(), db_fpath, mute=True)
+
+snippet pathjoin
+	os.path.join($1)
+
+snippet import
+	import argparse
+	import csv
+	import datetime as dt
+	import json
+	import os
+	import re
+	import sys
+	import time
+
+snippet pickle cache
+	import pickle
+	try:
+		with open("file_name.pkl", "r") as file:
+			obj = pickle.load(file)
+		print "cache hit"
+	except Exception as e:
+		print e
+		print "cache miss"
+		with open("file_name.pkl", "w+") as file:
+			pickle.dump(obj, file)
+
+snippet random id
+	import uuid
+	str(uuid.uuid1())[:${1}]
+
+snippet chunk
+	import numpy as np
+	lst = range(1,1000)
+	n_chunks = 10
+	chunks = np.array_split(lst, n_chunks)
+
+snippet time parse
+	import datetime as dt
+	
+	date_obj = dt.datetime.strptime("01/01/2001", "%m/%d/%Y")
+	date_obj.strftime("%B %d, %Y")
+
+snippet pickle
+	import pickle
+	with open("file_name.pkl", "w+") as file:
+		pickle.dump(obj, file)
+	with open("file_name.pkl", "r") as file:
+		obj = pickle.load(file)
+
+snippet args
+	parser = argparse.ArgumentParser(description='$0')
+	
+	parser.add_argument('--var', dest='var', nargs='?', default="",
+	                     help='description of var.')
+	parser.add_argument('--varList', dest='varList', nargs='*', default=[1,2,3],
+	                    help='description of varList.')
+	args = parser.parse_args()
+
+snippet parallel
+	from joblib import Parallel, delayed
+	import time
+	
+	start = time.time()
+	# single parameter job
+	# process = jobs split over CPUs, more overhead 
+	# thread = jobs share CPUs and RAM, less overhead
+	Parallel(n_jobs=2, prefer='processes')(delayed(my_fun)(i) for i in range(10))
+	
+	# multi-parameter job
+	Parallel(n_jobs=2, prefer='processes')(delayed(my_fun_2p)(i, j) for i in range(i_num) for j in range(j_num))
+	end = time.time()
+	
+	print('{:.4f} s'.format(end-start))
+
+snippet regex
+	import re
+	
+	# re.match() checks for a match only at the beginning of the string, 
+	# while re.search() checks for a match anywhere in the string 
+	# (this is what Perl does by default).
+	
+	s = re.search("c", "abc")
+	m = re.match("c", "abc")
+
+snippet date parse
+	import dateutil
+	dateutil.parser.parse("Today is Jan 5 2019", fuzzy=True)
+
+snippet pyspark hive
+	# sc is an existing SparkContext.
+	from pyspark.sql import HiveContext
+	sqlContext = HiveContext(sc)
+	
+	sqlContext.sql("CREATE TABLE IF NOT EXISTS src (key INT, value STRING)")
+	sqlContext.sql("LOAD DATA LOCAL INPATH 'examples/src/main/resources/kv1.txt' INTO TABLE src")
+	
+	# Queries can be expressed in HiveQL.
+	results = sqlContext.sql("FROM src SELECT key, value").toPandas()
+
+snippet temp
+	# DELETE >>>>>>>>>>>>>>
+	$0
+	# <<<<<<<<<<<<<<<<<<<<<
+
+snippet curr_path
+	CURR_PATH =  os.path.dirname(os.getcwd())
+
+snippet wd_path
+	idx = os.getcwd().lower().split("/").index("Name_of_base_directory$1")+1
+	WD_PATH = "/".join(os.getcwd().split("/")[:idx])
