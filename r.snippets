@@ -536,7 +536,7 @@ snippet randomforest
 		standardize = FALSE, maxit = 1000000, metric = "Accuracy")
 	confusionMatrix(rf_fit)
 
-snippet caret_trainmetric
+snippet caret train metric
 	## custom training metric in caret
 	grid <- expand.grid(.mtry = c(1, 2, 10))
 	
@@ -561,7 +561,7 @@ snippet caret_trainmetric
 						metric = "Mean_APE")
 
 ##-------------------------------------
-## TEXTASDATA
+## TEXT
 ##-------------------------------------
 
 
@@ -635,11 +635,11 @@ snippet dfm
 	textplot_wordcloud(my_dfm)
 
 ##-------------------------------------
-## LIKELIHOODMODELS
+## LOGLIK
 ##-------------------------------------
 
 
-snippet lm_ll
+snippet lm loglik
 	lm_ll <- function(par, X, y) {
 	  # m-clark.github.io/models-by-example
 	  #
@@ -665,7 +665,7 @@ snippet lm_ll
 	                                               # (see also fnscale in optim.control)
 	}
 
-snippet logit_ll
+snippet logit loglik
 	logit_ll <- function(par, X, y) {
 	  # m-clark.github.io/models-by-example
 	  #
@@ -689,7 +689,7 @@ snippet logit_ll
 	                                            # (see also fnscale in optim.control)
 	}
 
-snippet hurdle_ll
+snippet hurdle loglik
 	hurdle_poisson_ll <- function(y, X, par) {
 	  # m-clark.github.io/models-by-example
 	  #
@@ -1126,6 +1126,7 @@ snippet csvfastread
 ## OTHER
 ##-------------------------------------
 
+
 snippet shinyapp
 	library(shiny)
 	
@@ -1256,5 +1257,34 @@ snippet vapply
 snippet rapply
 	rapply(${1:list}, ${2:function})
 
+##-------------------------------------
+## 
+##-------------------------------------
+
+
 snippet ts
 	`r paste("#", date(), "------------------------------\n")`
+
+snippet caret_trainmetric
+	## custom training metric in caret
+	grid <- expand.grid(.mtry = c(1, 2, 10))
+	
+	sf <- function(data, lev = NULL, model = NULL, method = NULL) {
+		mean_ape <- mean(abs(data$pred - data$obs)/data$obs)
+		rmse <- sqrt(mean((data$pred - data$obs)^2))
+		out <- c(-mean_ape, -rmse)
+		names(out) <- c("Mean_APE", "RMSE")
+		return(out)
+	}
+	tc <- caret::trainControl(method = "cv", 
+							  number = 10,
+							  summaryFunction = sf)
+	
+	fit <- caret::train(x = X_train, y = y_train,
+						trControl = tc, 
+						tuneGrid = grid,
+						standardize = FALSE, 
+						ntrees = 1000,
+						maxit = 500, 
+						method = "rf", ## example: random forest
+						metric = "Mean_APE")
