@@ -257,18 +257,24 @@ def save_rstudio_snippets(rstd_snips):
                             fp.write("\n\t" + v_j)
 
 def save_sublime_snippets(subl_snips):
-    ## move old snippet files to back-up folder
-    subl_bak_path = os.path.join(os.environ["SUBLIME_SNIPPETS_PATH"], "bak")
-    if not os.path.exists(subl_bak_path):
-        os.makedirs(subl_bak_path)
-    print("\nMoving old Sublime snippets to `%s`" % subl_bak_path); time.sleep(0.5)
     for fn in os.listdir(os.environ["SUBLIME_SNIPPETS_PATH"]):
         if fn.endswith(".sublime-snippet"):
             src = os.path.join(os.environ["SUBLIME_SNIPPETS_PATH"], fn)
-            dest = os.path.join(subl_bak_path, fn)
-            if os.path.exists(dest):
-                os.remove(dest)
-            os.rename(src, dest)
+            os.remove(src)
+
+    # Note: making backups seems to interfere with snippets, so just removing old ones for now
+    # ## move old snippet files to back-up folder
+    # subl_bak_path = os.path.join(os.environ["SUBLIME_SNIPPETS_PATH"], "bak")
+    # if not os.path.exists(subl_bak_path):
+    #     os.makedirs(subl_bak_path)
+    # print("\nMoving old Sublime snippets to `%s`" % subl_bak_path); time.sleep(0.5)
+    # for fn in os.listdir(os.environ["SUBLIME_SNIPPETS_PATH"]):
+    #     if fn.endswith(".sublime-snippet"):
+    #         src = os.path.join(os.environ["SUBLIME_SNIPPETS_PATH"], fn)
+    #         dest = os.path.join(subl_bak_path, fn)
+    #         if os.path.exists(dest):
+    #             os.remove(dest)
+    #         os.rename(src, dest)
     ## write new snippet files
     print("\nSaving new Sublime snippets to `%s`" % os.environ["SUBLIME_SNIPPETS_PATH"]); time.sleep(0.5)   
     for l in subl_snips.keys():
