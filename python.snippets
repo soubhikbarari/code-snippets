@@ -11,8 +11,24 @@ snippet pandas chunkwise
 	    process(chunk)
 
 ##-------------------------------------
-## PANDPLYR
+## TIDYPANDAS
 ##-------------------------------------
+
+snippet left_join
+	df_c = df_a \
+		.merge(df_b, how = "left", on = "x")
+
+snippet right_join
+	df_c = df_a \
+		.merge(df_b, how = "right", on = "x")
+
+snippet full_join
+	df_c = df_a \
+		.merge(df_b, how = "outer", on = "x")
+
+snippet inner_join
+	df_c = df_a \
+		.merge(df_b, how = "inner", on = "x")
 
 snippet mutate
 	df["b"] = df["a"].apply(lambda x: x+1, 1)
