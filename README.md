@@ -13,4 +13,4 @@ Code snippets for data science (mostly) in Python, R, and other languages compil
 1. Pull to local machine.
 2. Fill in path variables in `config.env`.
 3. Edit snippet files in this directory as needed.
-4. Run `sync_snippets_local.sh` to transfer local snippets to R Studio and Sublime Text.
+4. Run `sync_snippets_local.sh` to transfer local snippets to R Studio and Sublime Text for use.
