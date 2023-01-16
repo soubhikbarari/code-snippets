@@ -461,6 +461,30 @@ snippet pca
 ##-------------------------------------
 
 
+snippet caret train metric
+	## custom training metric in caret
+	grid <- expand.grid(.mtry = c(1, 2, 10))
+	
+	sf <- function(data, lev = NULL, model = NULL, method = NULL) {
+		mean_ape <- mean(abs(data$pred - data$obs)/data$obs)
+		rmse <- sqrt(mean((data$pred - data$obs)^2))
+		out <- c(-mean_ape, -rmse)
+		names(out) <- c("Mean_APE", "RMSE")
+		return(out)
+	}
+	tc <- caret::trainControl(method = "cv", 
+							  number = 10,
+							  summaryFunction = sf)
+	
+	fit <- caret::train(x = X_train, y = y_train,
+						trControl = tc, 
+						tuneGrid = grid,
+						standardize = FALSE, 
+						ntrees = 1000,
+						maxit = 500, 
+						method = "rf", ## example: random forest
+						metric = "Mean_APE")
+
 snippet lasso
 	library(caret)
 	library(glmnet) ##https://web.stanford.edu/~hastie/glmnet/glmnet_alpha.html
@@ -974,7 +998,7 @@ snippet rmd
 	xaringan::infinite_moon_reader(rstudioapi::getSourceEditorContext()[["path"]])
 
 ##-------------------------------------
-## RMARKDOWN
+## RMD
 ##-------------------------------------
 
 
@@ -1026,9 +1050,8 @@ snippet section
 	#####------------------------------------------------------#
 
 ##-------------------------------------
-## HYPOTHESISTESTING
+## HYPOTEST
 ##-------------------------------------
-
 
 snippet equivalence
 	data(ufc)
@@ -1257,28 +1280,3 @@ snippet rapply
 
 snippet ts
 	`r paste("#", date(), "------------------------------\n")`
-
-
-snippet caret_trainmetric
-	## custom training metric in caret
-	grid <- expand.grid(.mtry = c(1, 2, 10))
-	
-	sf <- function(data, lev = NULL, model = NULL, method = NULL) {
-		mean_ape <- mean(abs(data$pred - data$obs)/data$obs)
-		rmse <- sqrt(mean((data$pred - data$obs)^2))
-		out <- c(-mean_ape, -rmse)
-		names(out) <- c("Mean_APE", "RMSE")
-		return(out)
-	}
-	tc <- caret::trainControl(method = "cv", 
-							  number = 10,
-							  summaryFunction = sf)
-	
-	fit <- caret::train(x = X_train, y = y_train,
-						trControl = tc, 
-						tuneGrid = grid,
-						standardize = FALSE, 
-						ntrees = 1000,
-						maxit = 500, 
-						method = "rf", ## example: random forest
-						metric = "Mean_APE")
