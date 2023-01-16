@@ -22,6 +22,7 @@ Output:
 ## PREAMBLE
 ## --------------------------------------------------------
 
+import argparse
 import datetime as dt
 import json
 import os
@@ -293,6 +294,15 @@ def save_sublime_snippets(subl_snips):
 ## --------------------------------------------------------
 
 if __name__ == '__main__':
+
+
+    parser = argparse.ArgumentParser()
+    
+    parser.add_argument('--replace_sublime', dest='replace_sublime', nargs='?', default=0,
+                         help="If true, don't incorporate Sublime snippets into R Studio snippet files.")
+    args = parser.parse_args()
+    args.replace_sublime = int(args.replace_sublime)
+    
     load_dot_env()
 
     subl_snips = get_sublime_snippets()
@@ -304,6 +314,7 @@ if __name__ == '__main__':
     backup_snippets(subl_snips, rstd_snips)
 
     save_sublime_snippets(subl_snips)
-    save_rstudio_snippets(rstd_snips)
+    if not args.replace_sublime:
+        save_rstudio_snippets(rstd_snips)
 
     print("\nDONE.")
