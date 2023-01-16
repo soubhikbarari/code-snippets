@@ -2,7 +2,7 @@
 ## PANDAS
 ##-------------------------------------
 
-snippet pandas.chunkwise
+snippet pd chunk
 	chunksize = 10 ** 6
 	for chunk in pd.read_csv(filename, chunksize=chunksize):
 	    process(chunk)
@@ -67,7 +67,7 @@ snippet case_when.3
 ## VIZ
 ##-------------------------------------
 
-snippet mpl.figure
+snippet mpl figure
 	## Init figure
 	w, h = (8.5, 5)
 	fig = plt.figure(figsize=(w,h))
@@ -77,7 +77,7 @@ snippet mpl.figure
 	fig.subplots_adjust(top=0.9, bottom=0.1, left=0.125, right=0.9, wspace=0.2, hspace=0.2)
 	ax0 = fig.add_subplot(gs1[0])
 
-snippet mpl.header
+snippet mpl header
 	import seaborn as sns
 	sns.set_style("white")
 	import matplotlib as mpl
@@ -89,7 +89,7 @@ snippet mpl.header
 ## ML
 ##-------------------------------------
 
-snippet skl.simulate.classif.data
+snippet skl mkclfdat
 	from sklearn.datasets import make_classification
 	
 	X, y = make_classification(
@@ -104,7 +104,7 @@ snippet skl.simulate.classif.data
 	    random_state=0,
 	)
 
-snippet skl.gmm
+snippet skl gmm
 	import numpy as np
 	import matplotlib.pyplot as plt
 	from matplotlib.colors import LogNorm
@@ -147,7 +147,7 @@ snippet skl.gmm
 	plt.axis("tight")
 	plt.show()
 
-snippet skl.stacked
+snippet skl stack
 	from sklearn.ensemble import StackingRegressor
 	from sklearn.linear_model import RidgeCV
 	
@@ -160,7 +160,7 @@ snippet skl.stacked
 	stacking_regressor = StackingRegressor(estimators=estimators, final_estimator=RidgeCV())
 	stacking_regressor
 
-snippet skl.preprocess
+snippet skl preproc
 	from sklearn.preprocessing import OneHotEncoder
 	from sklearn.preprocessing import StandardScaler
 	
@@ -174,7 +174,7 @@ snippet skl.preprocess
 	)
 	linear_preprocessor
 
-snippet skl.logit
+snippet skl logit
 	from sklearn.datasets import load_iris
 	from sklearn.linear_model import LogisticRegression
 	
@@ -190,7 +190,7 @@ snippet skl.logit
 	clf.predict_proba(X[:2, :])
 	clf.score(X, y)
 
-snippet skl.lm
+snippet skl linreg
 	from sklearn import linear_model
 	import numpy as np
 	
@@ -222,7 +222,7 @@ snippet skl.lm
 ## BAYESIAN
 ##-------------------------------------
 
-snippet pystan.example
+snippet pystan ex
 	import stan
 	
 	schools_code = """
@@ -254,7 +254,7 @@ snippet pystan.example
 	eta = fit["eta"]  # array with shape (8, 4000)
 	df = fit.to_frame()
 
-snippet pystan2.example
+snippet pystan2 ex
 	## DEPRECATED (only for reference)
 	import pystan
 	
@@ -296,7 +296,7 @@ snippet pystan2.example
 ## WEBSCRAPING
 ##-------------------------------------
 
-snippet scraper.attempts
+snippet attempts
 	import datetime as dt
 	import sys
 	from tqdm import tqdm
@@ -424,13 +424,6 @@ snippet selenium
 ## DEBUGGING
 ##-------------------------------------
 
-snippet time.delta
-	import datetime as dt
-	
-	dt1 = dt.datetime.strptime(tstamp1, "%H:%M:%S.%f")
-	dt2 = dt.datetime.strptime(tstamp2, "%H:%M:%S.%f")
-	gap = (dt1 - dt2).total_seconds()
-
 snippet exitpoint
 	# EXITPOINT >>>>>>>>>>>
 	import sys; sys.exit(1)
@@ -511,7 +504,7 @@ snippet header
 ## SQL
 ##-------------------------------------
 
-snippet hive.header
+snippet hive header
 	SET hive.exec.compress.intermediate=true;
 	SET hive.exec.compress.output=false;
 	SET hive.execution.engine=mr;
@@ -521,11 +514,21 @@ snippet hive.header
 	SET hive.exec.dynamic.partition.mode=nonstrict;
 	SET hive.enforce.bucketing = true;
 
-snippet pyspark.jdbc
+snippet pyspark jdbc
 	df = sqlContext.read.format('jdbc').options(url='jdbc:postgresql:dbserver', dbtable='schema.tablename').load()
 
+snippet pyspark hive
+	# sc is an existing SparkContext.
+	from pyspark.sql import HiveContext
+	sqlContext = HiveContext(sc)
+	
+	sqlContext.sql("CREATE TABLE IF NOT EXISTS src (key INT, value STRING)")
+	sqlContext.sql("LOAD DATA LOCAL INPATH 'examples/src/main/resources/kv1.txt' INTO TABLE src")
+	
+	# Queries can be expressed in HiveQL.
+	results = sqlContext.sql("FROM src SELECT key, value").toPandas()
 
-snippet mysql.ingest
+snippet mysql ingest
 	import threading
 	
 	MYSQL_USER = ""
@@ -575,12 +578,6 @@ snippet secrets
 	
 	# from access import * ## access credentials
 
-snippet timestamp
-	TIMESTAMP_YMD = dt.datetime.today().strftime('%Y-%m-%d')
-	TIMESTAMP_UTC = dt.datetime.utcnow()
-	TIMESTAMP_ISO = dt.datetime.now().isoformat()
-	TIMESTAMP_SEC = time.time()
-
 snippet dropbox
 	import dropbox
 	
@@ -602,10 +599,7 @@ snippet dropbox
 	with open(local_fpath, "rb") as f:
 		dbx.files_upload(f.read(), db_fpath, mute=True)
 
-snippet pathjoin
-	os.path.join($1)
-
-snippet import.standard
+snippet import standard
 	import argparse
 	import csv
 	import datetime as dt
@@ -615,11 +609,12 @@ snippet import.standard
 	import sys
 	import time
 
+snippet import ml
 	import numpy as np
 	import sklearn as skl
 	import stan
 
-snippet pickle.cache
+snippet cache
 	import pickle
 	try:
 		with open("file_name.pkl", "r") as file:
@@ -631,7 +626,7 @@ snippet pickle.cache
 		with open("file_name.pkl", "w+") as file:
 			pickle.dump(obj, file)
 
-snippet random.id
+snippet random id
 	import uuid
 	str(uuid.uuid1())[:${1}]
 
@@ -641,18 +636,28 @@ snippet chunk
 	n_chunks = 10
 	chunks = np.array_split(lst, n_chunks)
 
-snippet time.parse
+snippet time stamp
+	TIMESTAMP_YMD = dt.datetime.today().strftime('%Y-%m-%d')
+	TIMESTAMP_UTC = dt.datetime.utcnow()
+	TIMESTAMP_ISO = dt.datetime.now().isoformat()
+	TIMESTAMP_SEC = time.time()
+
+snippet time parse
 	import datetime as dt
 	
 	date_obj = dt.datetime.strptime("01/01/2001", "%m/%d/%Y")
 	date_obj.strftime("%B %d, %Y")
 
-snippet pickle
-	import pickle
-	with open("file_name.pkl", "w+") as file:
-		pickle.dump(obj, file)
-	with open("file_name.pkl", "r") as file:
-		obj = pickle.load(file)
+snippet timedelta
+	import datetime as dt
+	
+	dt1 = dt.datetime.strptime(tstamp1, "%H:%M:%S.%f")
+	dt2 = dt.datetime.strptime(tstamp2, "%H:%M:%S.%f")
+	gap = (dt1 - dt2).total_seconds()
+
+snippet date parse
+	import dateutil
+	dateutil.parser.parse("Today is Jan 5 2019", fuzzy=True)
 
 snippet args
 	parser = argparse.ArgumentParser(description='$0')
@@ -689,29 +694,17 @@ snippet regex
 	s = re.search("c", "abc")
 	m = re.match("c", "abc")
 
-snippet date.parse
-	import dateutil
-	dateutil.parser.parse("Today is Jan 5 2019", fuzzy=True)
-
-snippet pyspark.hive
-	# sc is an existing SparkContext.
-	from pyspark.sql import HiveContext
-	sqlContext = HiveContext(sc)
-	
-	sqlContext.sql("CREATE TABLE IF NOT EXISTS src (key INT, value STRING)")
-	sqlContext.sql("LOAD DATA LOCAL INPATH 'examples/src/main/resources/kv1.txt' INTO TABLE src")
-	
-	# Queries can be expressed in HiveQL.
-	results = sqlContext.sql("FROM src SELECT key, value").toPandas()
-
 snippet temp
 	# DELETE >>>>>>>>>>>>>>
 	$0
 	# <<<<<<<<<<<<<<<<<<<<<
 
-snippet curr.path
+snippet path join
+	os.path.join($1)
+
+snippet path curr
 	CURR_PATH =  os.path.dirname(os.getcwd())
 
-snippet wd.path
+snippet path wd
 	idx = os.getcwd().lower().split("/").index("Name_of_base_directory$1")+1
 	WD_PATH = "/".join(os.getcwd().split("/")[:idx])

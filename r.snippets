@@ -134,7 +134,7 @@ snippet upload
 ## VIZ
 ##-------------------------------------
 
-snippet gg.correlations.grid
+snippet gg corr grid
 	require(ggplot2)
 	require(magrittr)
 	require(ggrepel)
@@ -163,7 +163,7 @@ snippet gg.correlations.grid
 		scale_y_continuous(label=scales::percent_format(accuracy=1), limits=c(0,p_lim_max)) +
 		theme_bw()
 
-snippet gg.grid.shared.legend
+snippet gg grid shared legend
 	require(ggplot2)
 	    plist <- list()
 	    plist[["plot1"]] <- ggplot(data, aes(x=x,y=y)) + 
@@ -181,7 +181,7 @@ snippet gg.grid.shared.legend
 	    pgrid <- cowplot::plot_grid(plotlist = plist, ncol = 2, align="hv")
 	    pgrid_with_legend <- cowplot::plot_grid(pgrid, legend, ncol=1, rel_heights = c(1, .25))
 
-snippet gg.time
+snippet gg time
 	require(ggplot2)
 	    require(zoo)
 	
@@ -198,7 +198,7 @@ snippet gg.time
 	        scale_x_date(date_labels = "%b %d") +
 	        theme_bw()
 
-snippet gg.histogram
+snippet gg hist
 	require(ggplot2)
 	
 	h <- hist(df$var, breaks=100, plot=F)
@@ -208,7 +208,7 @@ snippet gg.histogram
 		stat_smooth(formula= y ~ s(x, k=10), method="gam", se=FALSE, color="red", lwd=.5) +
 		theme_classic()
 
-snippet gg.lm
+snippet gg coefs
 	## Visualize `lm()` results (try using `radon` data)
 	require(ggplot2)
 	require(tidyverse)
@@ -236,7 +236,7 @@ snippet gg.lm
 		ggplot(aes(x=term, y=y, ymin=ymin, ymax=ymax)) +
 		geom_point() + geom_linerange() + xlab("") + ylab("estimate")
 
-snippet gg.lm.dodge
+snippet gg coefs dodge
 	## Visualize regression fits with multiple alternative models (example uses radon data)
 	require(ggplot2)
 	require(broom)
@@ -294,7 +294,7 @@ snippet gg.lm.dodge
 			  legend.position="bottom") + 
 		guides(shape=guide_legend(title="model:", nrow=1))
 
-snippet gg.lm.grid
+snippet gg coefs grid
 	## Visualize regression fits on multiple categories of outcomes
 	require(ggplot2)
 	require(tidyverse)
@@ -366,7 +366,7 @@ snippet gg.lm.grid
 		scale_colour_manual(values=c("#dddddd","#717171","#000000"))
 	p
 
-snippet gg.barplot.grid
+snippet gg barplot grid
 	require(ggplot2)
 	
 	p <- ggplot(plot_df, aes(x=x, y=y, fill=fill_var)) +
@@ -382,7 +382,7 @@ snippet gg.barplot.grid
 		theme(legend.title=element_blank())
 	p
 
-snippet gg.histogram.2
+snippet gg hist2
 	require(ggplot2)
 	
 	plot_df <- rbind(
@@ -631,7 +631,7 @@ snippet dfm
 ## LOGLIK
 ##-------------------------------------
 
-snippet lm.loglik
+snippet loglik lm
 	lm_ll <- function(par, X, y) {
 	  # m-clark.github.io/models-by-example
 	  #
@@ -657,7 +657,7 @@ snippet lm.loglik
 	                                               # (see also fnscale in optim.control)
 	}
 
-snippet logit.loglik
+snippet loglik logit
 	logit_ll <- function(par, X, y) {
 	  # m-clark.github.io/models-by-example
 	  #
@@ -681,7 +681,7 @@ snippet logit.loglik
 	                                            # (see also fnscale in optim.control)
 	}
 
-snippet hurdle.loglik
+snippet loglik hurdle
 	hurdle_poisson_ll <- function(y, X, par) {
 	  # m-clark.github.io/models-by-example
 	  #
@@ -724,7 +724,7 @@ snippet hurdle.loglik
 ## GLM
 ##-------------------------------------
 
-snippet se.robust
+snippet se robust
 	library(coeftest)
 	library(sandwich)
 	
@@ -750,26 +750,26 @@ snippet se.robust
 	## cran.r-project.org/web/packages/sandwich/vignettes/sandwich.pdf
 	fit.se <- coeftest(fit, vcov. = vcovHC(fit, type = "HC0"))
 
-snippet se.clus
+snippet se clus
 	library(coeftest)
 	library(sandwich)
 	
 	fit <- lm(y ~ x + d, data = df)
 	fit.se <- coeftest(fit, vcov. = vcovCL, cluster = ~d))
 
-snippet jackknife.resid
+snippet jackknife
 	## plot fitted values vs. jack-knife residuals
 	## (residual for each observation is error when it 
 	## is omitted upon fitting model ... used as 
 	## outlier test)
 	plot(fitted(mod), rstudent(mod))
 
-snippet nb.fit
+snippet nbinomfit
 	library(MASS)
 	# response is a mixture of poissons
 	fit <- glm.nb(y ~ x0 + x1, data=df, link="log")
 
-snippet hurdle.fit
+snippet hurdlefit
 	library(pscl)
 	## DGP: 
 	## 1.) hurdle distribution decides if response is zero or not
@@ -779,7 +779,7 @@ snippet hurdle.fit
 	## covariates for hurdle component model: z0, z1
 	fit <- hurdle(y ~ x0 + x1 | z0 + z1, data=df, dist="poisson", zerodist="binomial")
 
-snippet zip.fit
+snippet zipfit
 	library(pscl)
 	## DGP:
 	## 1.) zero inflation model decides if response is definitely zero or not
@@ -788,70 +788,70 @@ snippet zip.fit
 	## covariates predicting systematic zero responses: z0, z1
 	fit <- zeroinfl(y ~ x0 + x1 | z0 + z1, data=df, dist="poisson")
 
-snippet pois.fit
+snippet poisfit
 	fit <- glm(y ~ x0 + x1, data=df, family=poisson(link="log"))
 
-snippet logit.fit
+snippet logitfit
 	fit <- glm(y ~ x0 + x1, data=df, family=binomial(link="logit"))
 
-snippet probit.fit
+snippet probitfit
 	fit <- glm(y ~ x0 + x1, data=df, family=binomial(link="probit"))
 
 snippet logit
 	log(p/(1-p))
 
-snippet inv.logit
+snippet logitinv
 	1/(1+exp(-a))
 	exp(a)/(exp(a)+1)
 
-snippet logit.to.prob
+snippet logit2prob
 	exp(coef(fit)) / (1 + exp(coef(fit)))
 
 snippet na.convert.mean
 	na.convert.mean <- function (df) {
-	vars <- names(df)
-	if (!is.null(resp <- attr(attr(df, "terms"), "response"))) {
-		vars <- vars[-resp]
-		x <- df[[resp]]
-		pos <- is.na(x)
-		if (any(pos)) {
-			df <- df[!pos, , drop = FALSE]
-			warning(paste(sum(pos), "observations omitted due to missing values in the response"))
-		}
-	}
-	for (j in vars) {  # j is variable names
-		x <- df[[j]]
-		pos <- is.na(x)
-		if (any(pos)) {
-			if (length(levels(x))) {   # factors
-				xx <- as.character(x)
-				xx[pos] <- "NA"
-				x <- factor(xx, exclude = NULL)
+		vars <- names(df)
+		if (!is.null(resp <- attr(attr(df, "terms"), "response"))) {
+			vars <- vars[-resp]
+			x <- df[[resp]]
+			pos <- is.na(x)
+			if (any(pos)) {
+				df <- df[!pos, , drop = FALSE]
+				warning(paste(sum(pos), "observations omitted due to missing values in the response"))
 			}
-			else if (is.matrix(x)) {   # matrices
-				ats <- attributes(x)
-				x.na <- 1*pos
-				w <- !pos
-				n <- nrow(x)
-				TT <- array(1, c(1, n))
-				xbar <- (TT %*% x)/(TT %*% w)
-				xbar <- t(TT) %*% xbar
-				x[pos] <- xbar[pos]
-				attributes(x) <- ats
-				attributes(x.na) <- ats
-				dimnames(x.na)[[2]]=paste(dimnames(x)[[2]],".na",sep='')
-				df[[paste(j,".na",sep='')]] <- x.na 
-			} else {   # ordinary numerical vector
-				ats <- attributes(x)
-				x[pos] <- mean(x[!pos])
-				x.na <- 1*pos
-				df[[paste(j,".na",sep='')]] <- x.na 
-				attributes(x) <- ats
-			}
-			df[[j]] <- x
 		}
-	}
-	df
+		for (j in vars) {  # j is variable names
+			x <- df[[j]]
+			pos <- is.na(x)
+			if (any(pos)) {
+				if (length(levels(x))) {   # factors
+					xx <- as.character(x)
+					xx[pos] <- "NA"
+					x <- factor(xx, exclude = NULL)
+				}
+				else if (is.matrix(x)) {   # matrices
+					ats <- attributes(x)
+					x.na <- 1*pos
+					w <- !pos
+					n <- nrow(x)
+					TT <- array(1, c(1, n))
+					xbar <- (TT %*% x)/(TT %*% w)
+					xbar <- t(TT) %*% xbar
+					x[pos] <- xbar[pos]
+					attributes(x) <- ats
+					attributes(x.na) <- ats
+					dimnames(x.na)[[2]]=paste(dimnames(x)[[2]],".na",sep='')
+					df[[paste(j,".na",sep='')]] <- x.na 
+				} else {   # ordinary numerical vector
+					ats <- attributes(x)
+					x[pos] <- mean(x[!pos])
+					x.na <- 1*pos
+					df[[paste(j,".na",sep='')]] <- x.na 
+					attributes(x) <- ats
+				}
+				df[[j]] <- x
+			}
+		}
+		df
 	}
 
 ##-------------------------------------
@@ -968,7 +968,7 @@ snippet rmd
 ## RMD
 ##-------------------------------------
 
-snippet rmd.notes.template
+snippet rmdheader
 	---
 	title: "Replication Notes for Discovery, Description, and Targetting of Anti-Vax Tweeters"
 	author: Soubhik Barari
@@ -1018,7 +1018,7 @@ snippet section
 ## HYPOTEST
 ##-------------------------------------
 
-snippet equivalence
+snippet equivtest
 	data(ufc)
 	### Tost
 	tost(ufc$Height.m.p, ufc$Height.m, epsilon = 1)
