@@ -2,7 +2,6 @@
 ## SFTP
 ##-------------------------------------
 
-
 snippet <
 	`r 
 	arg <- paste0("$$")
@@ -134,7 +133,6 @@ snippet upload
 ##-------------------------------------
 ## VIZ
 ##-------------------------------------
-
 
 snippet ggcorr_grid
 	require(ggplot2)
@@ -411,7 +409,6 @@ snippet gghist
 ## LINALG
 ##-------------------------------------
 
-
 snippet pca
 	dat_scaled <- scale(dat, center = T, scale = T)
 	
@@ -459,7 +456,6 @@ snippet pca
 ##-------------------------------------
 ## ML
 ##-------------------------------------
-
 
 snippet caret train metric
 	## custom training metric in caret
@@ -586,7 +582,6 @@ snippet caret train metric
 ## TEXT
 ##-------------------------------------
 
-
 snippet stmfit
 	K <- 10
 	stm_proc <- stm::textProcessor(
@@ -659,7 +654,6 @@ snippet dfm
 ##-------------------------------------
 ## LOGLIK
 ##-------------------------------------
-
 
 snippet lm loglik
 	lm_ll <- function(par, X, y) {
@@ -753,7 +747,6 @@ snippet hurdle loglik
 ##-------------------------------------
 ## GLM
 ##-------------------------------------
-
 
 snippet se.robust
 	library(coeftest)
@@ -889,7 +882,6 @@ snippet na.convert.mean
 ## TOYDATA
 ##-------------------------------------
 
-
 snippet radon
 	radon <- "radon first_floor blue_earth clay goodhue
 	1    0.9           1          0    1       0
@@ -938,7 +930,6 @@ snippet radon
 ##-------------------------------------
 ## DEBUGGING
 ##-------------------------------------
-
 
 snippet mem
 	format(object.size(X), 'GB')
@@ -1001,7 +992,6 @@ snippet rmd
 ## RMD
 ##-------------------------------------
 
-
 snippet rmd_notes
 	---
 	title: "Replication Notes for Discovery, Description, and Targetting of Anti-Vax Tweeters"
@@ -1019,7 +1009,6 @@ snippet rmd_notes
 ##-------------------------------------
 ## AESTHETICS
 ##-------------------------------------
-
 
 snippet options
 	options(readr.show_col_types = FALSE)
@@ -1083,7 +1072,6 @@ snippet bhq
 ## PROBABILITY
 ##-------------------------------------
 
-
 snippet lotv
 	library(tidyverse)
 	## Law of Total Variance
@@ -1116,7 +1104,6 @@ snippet lotv
 ## SURVEYS
 ##-------------------------------------
 
-
 snippet qualtrics
 	library(qualtRics)
 	
@@ -1135,7 +1122,6 @@ snippet qualtrics
 ## IO
 ##-------------------------------------
 
-
 snippet jsonfastread
 	d <- RcppSimdJson::fload(fpath)
 
@@ -1146,7 +1132,6 @@ snippet csvfastread
 ##-------------------------------------
 ## OTHER
 ##-------------------------------------
-
 
 snippet shinyapp
 	library(shiny)
