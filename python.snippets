@@ -2,7 +2,7 @@
 ## PANDAS
 ##-------------------------------------
 
-snippet pandas chunkwise
+snippet pandas.chunkwise
 	chunksize = 10 ** 6
 	for chunk in pd.read_csv(filename, chunksize=chunksize):
 	    process(chunk)
@@ -51,13 +51,13 @@ snippet case_when
 		"old2" : "new2"
 	})
 
-snippet case_when2
+snippet case_when.2
 	df['new_column'].update({ ## in-place
 		"old1" : "new1",
 		"old2" : "new2"
 	})
 
-snippet case_when3
+snippet case_when.3
 	df['new_column'] = 
 		np.where(df['col']<9, 'value1',
 	        np.where(df['col']<12, 'value2',
@@ -67,7 +67,7 @@ snippet case_when3
 ## VIZ
 ##-------------------------------------
 
-snippet mpl figure
+snippet mpl.figure
 	## Init figure
 	w, h = (8.5, 5)
 	fig = plt.figure(figsize=(w,h))
@@ -77,7 +77,7 @@ snippet mpl figure
 	fig.subplots_adjust(top=0.9, bottom=0.1, left=0.125, right=0.9, wspace=0.2, hspace=0.2)
 	ax0 = fig.add_subplot(gs1[0])
 
-snippet mpl header
+snippet mpl.header
 	import seaborn as sns
 	sns.set_style("white")
 	import matplotlib as mpl
@@ -89,7 +89,7 @@ snippet mpl header
 ## ML
 ##-------------------------------------
 
-snippet skl sim classif
+snippet skl.simulate.classif.data
 	from sklearn.datasets import make_classification
 	
 	X, y = make_classification(
@@ -104,7 +104,7 @@ snippet skl sim classif
 	    random_state=0,
 	)
 
-snippet skl gmm
+snippet skl.gmm
 	import numpy as np
 	import matplotlib.pyplot as plt
 	from matplotlib.colors import LogNorm
@@ -147,7 +147,7 @@ snippet skl gmm
 	plt.axis("tight")
 	plt.show()
 
-snippet skl stacked reg
+snippet skl.stacked
 	from sklearn.ensemble import StackingRegressor
 	from sklearn.linear_model import RidgeCV
 	
@@ -160,7 +160,7 @@ snippet skl stacked reg
 	stacking_regressor = StackingRegressor(estimators=estimators, final_estimator=RidgeCV())
 	stacking_regressor
 
-snippet skl preprocess
+snippet skl.preprocess
 	from sklearn.preprocessing import OneHotEncoder
 	from sklearn.preprocessing import StandardScaler
 	
@@ -174,7 +174,7 @@ snippet skl preprocess
 	)
 	linear_preprocessor
 
-snippet skl logit reg
+snippet skl.logit
 	from sklearn.datasets import load_iris
 	from sklearn.linear_model import LogisticRegression
 	
@@ -190,7 +190,7 @@ snippet skl logit reg
 	clf.predict_proba(X[:2, :])
 	clf.score(X, y)
 
-snippet skl linear reg
+snippet skl.lm
 	from sklearn import linear_model
 	import numpy as np
 	
@@ -222,7 +222,7 @@ snippet skl linear reg
 ## BAYESIAN
 ##-------------------------------------
 
-snippet pystan example
+snippet pystan.example
 	import stan
 	
 	schools_code = """
@@ -254,7 +254,7 @@ snippet pystan example
 	eta = fit["eta"]  # array with shape (8, 4000)
 	df = fit.to_frame()
 
-snippet pystan2 example
+snippet pystan2.example
 	## DEPRECATED (only for reference)
 	import pystan
 	
@@ -296,7 +296,7 @@ snippet pystan2 example
 ## WEBSCRAPING
 ##-------------------------------------
 
-snippet scraper attempts
+snippet scraper.attempts
 	import datetime as dt
 	import sys
 	from tqdm import tqdm
@@ -424,7 +424,7 @@ snippet selenium
 ## DEBUGGING
 ##-------------------------------------
 
-snippet timedelta
+snippet time.delta
 	import datetime as dt
 	
 	dt1 = dt.datetime.strptime(tstamp1, "%H:%M:%S.%f")
@@ -511,7 +511,7 @@ snippet header
 ## SQL
 ##-------------------------------------
 
-snippet hive header
+snippet hive.header
 	SET hive.exec.compress.intermediate=true;
 	SET hive.exec.compress.output=false;
 	SET hive.execution.engine=mr;
@@ -521,36 +521,11 @@ snippet hive header
 	SET hive.exec.dynamic.partition.mode=nonstrict;
 	SET hive.enforce.bucketing = true;
 
-snippet pyspark jdbc
+snippet pyspark.jdbc
 	df = sqlContext.read.format('jdbc').options(url='jdbc:postgresql:dbserver', dbtable='schema.tablename').load()
 
-snippet hive bdrc header
-	--------------------------------
-	-- PRINCETON BD HIVEQL CONFIG --
-	--------------------------------
-	-- 6 data nodes, 4 service nodes
-	--
-	-- ===Memory===
-	-- 2.4  GB RAM/Head node
-	-- 10.7 GB RAM/Worker node
-	--
-	-- ===Total RAM===
-	-- 96  GB /Head node
-	-- 256 GB /Worker node
-	--------------------------------
-	
-	-- Print column names
-	SET hive.cli.print.header=true;
-	
-	-- Execution engine
-	SET hive.execution.engine=mr;
-	
-	-- Compress intermediate and output files
-	-- (Don't compress output if writing results out to file)
-	SET hive.exec.compress.intermediate=true;
-	SET hive.exec.compress.output=true;
 
-snippet ingest mysql
+snippet mysql.ingest
 	import threading
 	
 	MYSQL_USER = ""
@@ -630,7 +605,7 @@ snippet dropbox
 snippet pathjoin
 	os.path.join($1)
 
-snippet import
+snippet import.standard
 	import argparse
 	import csv
 	import datetime as dt
@@ -640,7 +615,11 @@ snippet import
 	import sys
 	import time
 
-snippet pickle cache
+	import numpy as np
+	import sklearn as skl
+	import stan
+
+snippet pickle.cache
 	import pickle
 	try:
 		with open("file_name.pkl", "r") as file:
@@ -652,7 +631,7 @@ snippet pickle cache
 		with open("file_name.pkl", "w+") as file:
 			pickle.dump(obj, file)
 
-snippet random id
+snippet random.id
 	import uuid
 	str(uuid.uuid1())[:${1}]
 
@@ -662,7 +641,7 @@ snippet chunk
 	n_chunks = 10
 	chunks = np.array_split(lst, n_chunks)
 
-snippet time parse
+snippet time.parse
 	import datetime as dt
 	
 	date_obj = dt.datetime.strptime("01/01/2001", "%m/%d/%Y")
@@ -710,11 +689,11 @@ snippet regex
 	s = re.search("c", "abc")
 	m = re.match("c", "abc")
 
-snippet date parse
+snippet date.parse
 	import dateutil
 	dateutil.parser.parse("Today is Jan 5 2019", fuzzy=True)
 
-snippet pyspark hive
+snippet pyspark.hive
 	# sc is an existing SparkContext.
 	from pyspark.sql import HiveContext
 	sqlContext = HiveContext(sc)
@@ -730,9 +709,9 @@ snippet temp
 	$0
 	# <<<<<<<<<<<<<<<<<<<<<
 
-snippet curr_path
+snippet curr.path
 	CURR_PATH =  os.path.dirname(os.getcwd())
 
-snippet wd_path
+snippet wd.path
 	idx = os.getcwd().lower().split("/").index("Name_of_base_directory$1")+1
 	WD_PATH = "/".join(os.getcwd().split("/")[:idx])

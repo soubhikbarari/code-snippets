@@ -134,7 +134,7 @@ snippet upload
 ## VIZ
 ##-------------------------------------
 
-snippet ggcorr_grid
+snippet gg.correlations.grid
 	require(ggplot2)
 	require(magrittr)
 	require(ggrepel)
@@ -163,7 +163,7 @@ snippet ggcorr_grid
 		scale_y_continuous(label=scales::percent_format(accuracy=1), limits=c(0,p_lim_max)) +
 		theme_bw()
 
-snippet gggrid_shared_legend
+snippet gg.grid.shared.legend
 	require(ggplot2)
 	    plist <- list()
 	    plist[["plot1"]] <- ggplot(data, aes(x=x,y=y)) + 
@@ -181,7 +181,7 @@ snippet gggrid_shared_legend
 	    pgrid <- cowplot::plot_grid(plotlist = plist, ncol = 2, align="hv")
 	    pgrid_with_legend <- cowplot::plot_grid(pgrid, legend, ncol=1, rel_heights = c(1, .25))
 
-snippet ggtime
+snippet gg.time
 	require(ggplot2)
 	    require(zoo)
 	
@@ -198,7 +198,7 @@ snippet ggtime
 	        scale_x_date(date_labels = "%b %d") +
 	        theme_bw()
 
-snippet histogram
+snippet gg.histogram
 	require(ggplot2)
 	
 	h <- hist(df$var, breaks=100, plot=F)
@@ -208,7 +208,7 @@ snippet histogram
 		stat_smooth(formula= y ~ s(x, k=10), method="gam", se=FALSE, color="red", lwd=.5) +
 		theme_classic()
 
-snippet gglm
+snippet gg.lm
 	## Visualize `lm()` results (try using `radon` data)
 	require(ggplot2)
 	require(tidyverse)
@@ -236,7 +236,7 @@ snippet gglm
 		ggplot(aes(x=term, y=y, ymin=ymin, ymax=ymax)) +
 		geom_point() + geom_linerange() + xlab("") + ylab("estimate")
 
-snippet gglm_dodge
+snippet gg.lm.dodge
 	## Visualize regression fits with multiple alternative models (example uses radon data)
 	require(ggplot2)
 	require(broom)
@@ -294,7 +294,7 @@ snippet gglm_dodge
 			  legend.position="bottom") + 
 		guides(shape=guide_legend(title="model:", nrow=1))
 
-snippet gglm_grid
+snippet gg.lm.grid
 	## Visualize regression fits on multiple categories of outcomes
 	require(ggplot2)
 	require(tidyverse)
@@ -366,7 +366,7 @@ snippet gglm_grid
 		scale_colour_manual(values=c("#dddddd","#717171","#000000"))
 	p
 
-snippet ggbar_grid
+snippet gg.barplot.grid
 	require(ggplot2)
 	
 	p <- ggplot(plot_df, aes(x=x, y=y, fill=fill_var)) +
@@ -382,7 +382,7 @@ snippet ggbar_grid
 		theme(legend.title=element_blank())
 	p
 
-snippet gghist
+snippet gg.histogram.2
 	require(ggplot2)
 	
 	plot_df <- rbind(
@@ -457,7 +457,7 @@ snippet pca
 ## ML
 ##-------------------------------------
 
-snippet caret.train.metric
+snippet caret.training.metric
 	## custom training metric in caret
 	grid <- expand.grid(.mtry = c(1, 2, 10))
 	
@@ -554,30 +554,6 @@ snippet randomforest
 		standardize = FALSE, maxit = 1000000, metric = "Accuracy")
 	confusionMatrix(rf_fit)
 
-snippet caret train metric
-	## custom training metric in caret
-	grid <- expand.grid(.mtry = c(1, 2, 10))
-	
-	sf <- function(data, lev = NULL, model = NULL, method = NULL) {
-		mean_ape <- mean(abs(data$pred - data$obs)/data$obs)
-		rmse <- sqrt(mean((data$pred - data$obs)^2))
-		out <- c(-mean_ape, -rmse)
-		names(out) <- c("Mean_APE", "RMSE")
-		return(out)
-	}
-	tc <- caret::trainControl(method = "cv", 
-							  number = 10,
-							  summaryFunction = sf)
-	
-	fit <- caret::train(x = X_train, y = y_train,
-						trControl = tc, 
-						tuneGrid = grid,
-						standardize = FALSE, 
-						ntrees = 1000,
-						maxit = 500, 
-						method = "rf", ## example: random forest
-						metric = "Mean_APE")
-
 ##-------------------------------------
 ## TEXT
 ##-------------------------------------
@@ -655,7 +631,7 @@ snippet dfm
 ## LOGLIK
 ##-------------------------------------
 
-snippet lm loglik
+snippet lm.loglik
 	lm_ll <- function(par, X, y) {
 	  # m-clark.github.io/models-by-example
 	  #
@@ -681,7 +657,7 @@ snippet lm loglik
 	                                               # (see also fnscale in optim.control)
 	}
 
-snippet logit loglik
+snippet logit.loglik
 	logit_ll <- function(par, X, y) {
 	  # m-clark.github.io/models-by-example
 	  #
@@ -705,7 +681,7 @@ snippet logit loglik
 	                                            # (see also fnscale in optim.control)
 	}
 
-snippet hurdle loglik
+snippet hurdle.loglik
 	hurdle_poisson_ll <- function(y, X, par) {
 	  # m-clark.github.io/models-by-example
 	  #
@@ -781,19 +757,19 @@ snippet se.clus
 	fit <- lm(y ~ x + d, data = df)
 	fit.se <- coeftest(fit, vcov. = vcovCL, cluster = ~d))
 
-snippet jresid
+snippet jackknife.resid
 	## plot fitted values vs. jack-knife residuals
 	## (residual for each observation is error when it 
 	## is omitted upon fitting model ... used as 
 	## outlier test)
 	plot(fitted(mod), rstudent(mod))
 
-snippet nbfit
+snippet nb.fit
 	library(MASS)
 	# response is a mixture of poissons
 	fit <- glm.nb(y ~ x0 + x1, data=df, link="log")
 
-snippet hurdlefit
+snippet hurdle.fit
 	library(pscl)
 	## DGP: 
 	## 1.) hurdle distribution decides if response is zero or not
@@ -803,7 +779,7 @@ snippet hurdlefit
 	## covariates for hurdle component model: z0, z1
 	fit <- hurdle(y ~ x0 + x1 | z0 + z1, data=df, dist="poisson", zerodist="binomial")
 
-snippet zipfit
+snippet zip.fit
 	library(pscl)
 	## DGP:
 	## 1.) zero inflation model decides if response is definitely zero or not
@@ -812,23 +788,23 @@ snippet zipfit
 	## covariates predicting systematic zero responses: z0, z1
 	fit <- zeroinfl(y ~ x0 + x1 | z0 + z1, data=df, dist="poisson")
 
-snippet poisfit
+snippet pois.fit
 	fit <- glm(y ~ x0 + x1, data=df, family=poisson(link="log"))
 
-snippet logitfit
+snippet logit.fit
 	fit <- glm(y ~ x0 + x1, data=df, family=binomial(link="logit"))
 
-snippet probitfit
+snippet probit.fit
 	fit <- glm(y ~ x0 + x1, data=df, family=binomial(link="probit"))
 
 snippet logit
 	log(p/(1-p))
 
-snippet invlogit
+snippet inv.logit
 	1/(1+exp(-a))
 	exp(a)/(exp(a)+1)
 
-snippet logit2prob
+snippet logit.to.prob
 	exp(coef(fit)) / (1 + exp(coef(fit)))
 
 snippet na.convert.mean
@@ -992,7 +968,7 @@ snippet rmd
 ## RMD
 ##-------------------------------------
 
-snippet rmd.notes
+snippet rmd.notes.template
 	---
 	title: "Replication Notes for Discovery, Description, and Targetting of Anti-Vax Tweeters"
 	author: Soubhik Barari
@@ -1242,7 +1218,7 @@ snippet lapply
 snippet checklist
 	cat("\nItem 1"); $1; cat("✓")
 
-snippet setwd_curr
+snippet setwd.current
 	setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 snippet checkmark
