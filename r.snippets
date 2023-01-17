@@ -2,46 +2,6 @@
 ## SFTP
 ##-------------------------------------
 
-snippet <
-	`r 
-	arg <- paste0("$$")
-	if (file.exists('sftp-config.json')) {
-		sftp_info <- jsonlite::fromJSON('sftp-config.json')
-		suppressMessages(library(ssh))	
-		if (arg == "") {
-			## connect
-			scp_session <- ssh_connect(host = paste(sftp_info$user,sftp_info$host,sep='@'), 
-									   passwd = sftp_info$password)
-			## get paths
-			local_path <- rstudioapi::getActiveDocumentContext()$path
-			local_dir <- dirname(local_path)
-			remote_path <- file.path(sftp_info$remote_path,
-								   gsub(paste0('.*',basename(sftp_info$remote_path),'/'), '', local_path))
-			## download 
-			scp_download(scp_session, files=remote_path, to=local_dir)
-			ssh_disconnect(scp_session)
-			## log
-			print(sprintf("# downloaded '%s' to '%s'",basename(remote_path),local_dir))
-		} else {
-			## connect
-			scp_session <- ssh_connect(host = paste(sftp_info$user,sftp_info$host,sep='@'), 
-									   passwd = sftp_info$password)
-			## get paths
-			local_dir <- getwd()
-			local_path <- arg
-			remote_path <- file.path(sftp_info$remote_path,
-									 gsub(paste0('.*',basename(sftp_info$remote_path),'/'), '', local_path))
-			## download 
-			scp_download(scp_session, files=remote_path, to=local_dir)
-			ssh_disconnect(scp_session)
-			## log
-			print(sprintf("# downloaded '%s' to '%s'",basename(remote_path),local_path))
-		}	
-	} else {
-		print("# error: 'sftp-config.json' not found on local")
-	}
-	`
-
 snippet download
 	`r 
 	if (file.exists('sftp-config.json')) {
@@ -62,50 +22,6 @@ snippet download
 	} else {
 		print("# error: 'sftp-config.json' not found on local")
 	}`
-
-snippet >
-	`r 
-	arg <- paste0("$$")
-	if (file.exists('sftp-config.json')) {
-		sftp_info <- jsonlite::fromJSON('sftp-config.json')
-		suppressMessages(library(ssh))	
-		if (arg == "") {
-			## save
-			#rstudioapi::documentSave(rstudioapi::getActiveDocumentContext()$id)
-			## connect
-			scp_session <- ssh_connect(host = paste(sftp_info$user,sftp_info$host,sep='@'), 
-									   passwd = sftp_info$password)
-			## get paths
-			local_path <- rstudioapi::getActiveDocumentContext()$path
-			remote_path <- file.path(sftp_info$remote_path,
-								   gsub(paste0('.*',basename(sftp_info$remote_path),'/'), '', local_path))
-			## upload 
-			scp_upload(scp_session, files=local_path, to=remote_path)
-			ssh_disconnect(scp_session)
-			## log
-			print(sprintf("# uploaded '%s' to '%s'",basename(local_path),remote_path))
-		} else {
-			if (file.exists(arg)) {
-				## connect
-				scp_session <- ssh_connect(host = paste(sftp_info$user,sftp_info$host,sep='@'), 
-										   passwd = sftp_info$password)
-				## get paths
-				local_path <- file.path(getwd(), arg)
-				remote_path <- file.path(sftp_info$remote_path,
-									     gsub(paste0('.*',basename(sftp_info$remote_path),'/'), '', local_path))
-				## upload 
-				scp_upload(scp_session, files=local_path, to=remote_path)
-				ssh_disconnect(scp_session)
-				## log
-				print(sprintf("# uploaded '%s' to '%s'",basename(local_path),remote_path))
-			} else {
-				print(sprintf("# error: '%s' not found on local",arg))
-			}
-		}	
-	} else {
-		print("# error: 'sftp-config.json' not found on local")
-	}
-	`
 
 snippet upload
 	`r 
