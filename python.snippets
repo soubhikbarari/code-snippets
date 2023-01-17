@@ -161,7 +161,45 @@ def code_interaction_variables(X, interactions):
 snippet onehot
 	pd.get_dummies(df, drop_first = "True").replace({False: 0, True: 1})
 
-snippet sklearn mkclfdat
+snippet sklearn classif simple
+	## template for a simple classification workflow
+	import numpy as np
+	from sklearn.model_selection import train_test_split
+	from sklearn.model_selection import cross_val_score
+
+	from sklearn import datasets
+
+	from sklearn import svm
+	from sklearn.tree import DecisionTreeClassifier
+	from sklearn.ensemble import RandomForestClassifier
+	from sklearn.linear_model import LogisticRegression
+
+	X, y = make_classification(
+		n_samples=1000, n_features=4,
+        n_informative=2, n_redundant=0,
+        random_state=0, shuffle=False
+    )
+
+	X_train, X_test, y_train, y_test = train_test_split(
+	    X, y, test_size=0.4, random_state=0
+	)
+
+	X_train.shape, y_train.shape
+	X_test.shape, y_test.shape
+
+	clf = svm.SVC(kernel='linear', C=1).fit(X_train, y_train)
+	clf.score(X_test, y_test)
+
+	clf = DecisionTreeClassifier().fit(X_train, y_train)
+	clf.score(X_test, y_test)
+
+	clf = RandomForestClassifier(max_depth=2, random_state=0).fit(X_train, y_train)
+	clf.score(X_test, y_test)
+
+	clf = LogisticRegression(penalty="l1", C=1).fit(X, y)
+	clf.score(X_test, y_test)	
+
+snippet sklearn classif data
 	from sklearn.datasets import make_classification
 	
 	X, y = make_classification(
