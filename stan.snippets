@@ -268,9 +268,9 @@ snippet hierlogit
       int<lower=1> D; // number of predictors
       int<lower=0> N; // number of observations
       int<lower=1> L; // number of levels
-      array[N] int<lower=0, upper=1> y;
-      array[N] int<lower=1, upper=L> ll;
-      array[N] row_vector[D] x;
+      array[N] int<lower=0, upper=1> y;  // binary outcomes
+      array[N] int<lower=1, upper=L> ll; // level indicators
+      array[N] row_vector[D] x;          // covariate vectors
     }
     parameters {
       array[D] real mu;
