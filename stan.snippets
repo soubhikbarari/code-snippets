@@ -1,80 +1,551 @@
 ##-------------------------------------
+## EVAL
+##-------------------------------------
+
+snippet posterior crossvalidation
+    /* https://mc-stan.org/docs/stan-users-guide/cross-validation.html */
+    functions {
+      array[] int permutation_rng(int N) {
+         // permute indices in training set
+         int N = rows(x);
+         array[N] int y;
+         for (n in 1:N) {
+           y[n] = n;
+         }
+         vector[N] theta = rep_vector(1.0 / N, N);
+         for (n in 1:rows(y)) {
+           int i = categorical_rng(theta);
+         }
+          array[n] int temp = y;
+          y[n] = y[i];
+          y[i] = temp;
+         }
+         return y;
+      }
+    }
+    data {
+      int<lower=0> N;
+      vector[N] x;
+      vector[N] y;
+      int<lower=0, upper=N> N_test;
+    }
+    transformed data {
+      int N_train = N - N_test;
+      array[N] int permutation = permutation_rng(N);
+      vector[N_train] x_train = x[permutation[1 : N_train]];
+      vector[N_train] y_train = y[permutation[1 : N_train]];
+      vector[N_test] x_test = x[permutation[N_train + 1 : N]];
+      vector[N_test] y_test = y[permutation[N_train + 1 : N]];
+    }
+    parameters {
+      real alpha;
+      real beta;
+      real<lower=0> sigma;
+    }
+    model {
+      y_train ~ normal(alpha + beta * x_train, sigma);
+      { alpha, beta, sigma } ~ normal(0, 1);
+    }
+    generated quantities {
+      vector[N] y_test_hat = normal_rng(alpha + beta * x_test, sigma);
+      vector[N] err = y_test - y_test_hat;
+    }
+
+
+snippet posterior pvalues
+    /* https://mc-stan.org/docs/stan-users-guide/simulating-from-the-posterior-predictive-distribution.html */
+    data {
+      int<lower=0> N;
+      vector[N] x;
+      vector[N] y;
+    }
+    parameters {
+      real alpha;
+      real beta;
+      real<lower=0> sigma;
+    }
+    model {
+      alpha ~ normal(0, 2);
+      beta ~ normal(0, 1);
+      sigma ~ normal(0, 1);
+      y ~ normal(alpha + beta * x, sigma);
+    }
+    generated quantities {
+      array[N] real y_rep = normal_rng(alpha + beta * x, sigma);
+      mean_gt = mean(y_rep) > mean(y); // ~0.5 = good fit
+      sd_gt = sd(y_rep) > sd(y);       // ~0.5 = good fit
+    }
+
+##-------------------------------------
+## SIM
+##-------------------------------------
+
+snippet sim posterior
+    /* https://mc-stan.org/docs/stan-users-guide/simulating-from-the-posterior-predictive-distribution.html */
+    data {
+      int<lower=0> N;
+      vector[N] x;
+      vector[N] y;
+    }
+    parameters {
+      real alpha;
+      real beta;
+      real<lower=0> sigma;
+    }
+    model {
+      alpha ~ normal(0, 2);
+      beta ~ normal(0, 1);
+      sigma ~ normal(0, 1);
+      y ~ normal(alpha + beta * x, sigma);
+    }
+    generated quantities {
+      array[N] real y_rep = normal_rng(alpha + beta * x, sigma);
+    }
+
+snippet sim norm
+    /* https://mc-stan.org/docs/stan-users-guide/examples-of-simulation-based-calibration.html */
+    transformed data {
+      real mu_sim = normal_rng(0, 1);
+      real<lower=0> sigma_sim = lognormal_rng(0, 1);
+
+      int<lower=0> J = 10;
+      vector[J] y_sim;
+      for (j in 1:J) {
+        y_sim[j] = student_t_rng(4, mu_sim, sigma_sim);
+      }
+    }
+    parameters {
+      real mu;
+      real<lower=0> sigma;
+    }
+    model {
+      mu ~ normal(0, 1);
+      sigma ~ lognormal(0, 1);
+
+      y_sim ~ normal(mu, sigma);
+    }
+    generated quantities {
+      array[2] int<lower=0, upper=1> I_lt_sim
+          = { mu < mu_sim, sigma < sigma_sim };
+    }
+
+##-------------------------------------
+## INFERENCE
+##-------------------------------------
+
+snnippet bootstrap
+    /* https://mc-stan.org/docs/stan-users-guide/coding-the-bootstrap-in-stan.html */
+    data {
+      int<lower=0> N;
+      vector[N] x;
+      vector[N] y;
+      int<lower=0, upper=1> resample;
+    }
+    transformed data {
+      simplex[N] uniform = rep_vector(1.0 / N, N);
+      array[N] int<lower=1, upper=N> boot_idxs;
+      for (n in 1:N) {
+        boot_idxs[n] = resample ? categorical_rng(uniform) : n;
+      }
+    }
+    parameters {
+      real alpha;
+      real beta;
+      real<lower=0> sigma;
+    }
+    model {
+      y[boot_idxs] ~ normal(alpha + beta * x[boot_idxs], sigma);
+    }
+
+snippet posterior pred poisreg
+    /* https://mc-stan.org/docs/stan-users-guide/posterior-prediction-for-regressions.html */
+    data {
+      int<lower=0> N;
+      vector[N] x;
+      array[N] int<lower=0> y;
+      int<lower=0> N_tilde;
+      vector[N_tilde] x_tilde;
+    }
+    parameters {
+      real alpha;
+      real beta;
+    }
+    model {
+      y ~ poisson_log(alpha + beta * x);
+      { alpha, beta } ~ normal(0, 1);
+    }
+    generated quantities {
+      array[N_tilde] int<lower=0> y_tilde
+        = poisson_log_rng(alpha + beta * x_tilde);
+    }
+
+snippet posterior pred linreg
+    /* https://mc-stan.org/docs/stan-users-guide/prediction-forecasting-and-backcasting.html */
+    data {
+      int<lower=1> K;
+      int<lower=0> N;
+      matrix[N, K] x;
+      vector[N] y;
+
+      int<lower=0> N_new;
+      matrix[N_new, K] x_new;
+    }
+    parameters {
+      vector[K] beta;
+      real<lower=0> sigma;
+    }
+    model {
+      y ~ normal(x * beta, sigma);
+    }
+    generated quantities {
+      vector[N_new] y_new;
+      for (n in 1:N_new) {
+        y_new[n] = normal_rng(x_new[n] * beta, sigma);
+      }
+    }
+
+##-------------------------------------
+## MODELS
+##-------------------------------------
+
+snippet mrp
+    /* https://mc-stan.org/docs/stan-users-guide/coding-mrp-in-stan.html */
+    data {
+      int<lower=0> N;                 // number of observations
+      array[N] int<lower=0> y;        // vote choice outcome
+      array[4, 5, 50] int<lower=0> P; // population size of cells      
+      /* random effects */
+      array[N] int<lower=1, upper=4> age;    // age cell indicators
+      array[N] int<lower=1, upper=5> income; // income cell indicators
+      array[N] int<lower=1, upper=50> state; // state cell indicators
+      array[N] int<lower=1, upper=2> sex;    // sex cell indicators
+      /* fixed effects */
+      array[50] real<lower=0> income; 
+
+    }
+    parameters {
+      real alpha;
+      real<lower=0> sigma_beta;
+      vector<multiplier=sigma_beta>[4] beta;
+      real<lower=0> sigma_gamma;
+      vector<multiplier=sigma_gamma>[5] gamma;
+      real<lower=0> sigma_delta;
+      vector<multiplier=sigma_delta>[50] delta;
+      real epsilon;
+      real psi;
+    }
+    model {
+      y ~ bernoulli_logit(alpha + beta[age] + gamma[income] + delta[state] 
+                          + [epsilon, -epsilon][sex]' + income[state]*psi);
+      alpha ~ normal(0, 2);
+      beta ~ normal(0, sigma_beta);
+      gamma ~ normal(0, sigma_gamma);
+      delta ~ normal(0, sigma_delta);
+      epsilon ~ normal(0, 2);
+      psi ~ normal(0, 2);
+      { sigma_beta, sigma_gamma, sigma_delta } ~ normal(0, 1);
+    }
+    generated quantities {
+      real expect_pos = 0;
+      int total = 0;
+      for (b in 1:4) {
+        for (c in 1:5) {
+          for (d in 1:50) {
+            total += P[b, c, d];
+            expect_pos
+              += P[b, c, d]
+                 * inv_logit(alpha + beta[b] + gamma[c] + delta[d]
+                             + [epsilon, -epsilon][sex]' + income[state]*psi);
+          }
+        }
+      }
+      real<lower=0, upper=1> phi = expect_pos / total;
+    }   
+
+snippet hierlogit
+    /* https://mc-stan.org/docs/stan-users-guide/hierarchical-logistic-regression.html */
+    data {
+      int<lower=1> D; // number of predictors
+      int<lower=0> N; // number of observations
+      int<lower=1> L; // numberr of levels
+      array[N] int<lower=0, upper=1> y;
+      array[N] int<lower=1, upper=L> ll;
+      array[N] row_vector[D] x;
+    }
+    parameters {
+      array[D] real mu;
+      array[D] real<lower=0> sigma;
+      array[L] vector[D] beta;
+    }
+    model {
+      for (d in 1:D) {
+        mu[d] ~ normal(0, 100);
+        for (l in 1:L) {
+          beta[l, d] ~ normal(mu[d], sigma[d]); // partially pooled level-specific coefficient
+        }
+      }
+      for (n in 1:N) {
+        y[n] ~ bernoulli(inv_logit(x[n] * beta[ll[n]]));
+      }
+    }
+
+snippet multilogit
+    /* https://mc-stan.org/docs/stan-users-guide/multi-logit.html */
+    data {
+      int K; // number of categories
+      int N; // number of observations
+      int D; // number of predictors
+      array[N] int y;
+      matrix[N, D] x;
+    }
+    parameters {
+      matrix[D, K] beta;
+    }
+    model {
+      matrix[N, K] x_beta = x * beta;
+
+      to_vector(beta) ~ normal(0, 5);
+
+      for (n in 1:N) {
+        y[n] ~ categorical_logit(x_beta[n]');
+
+      }
+    }   
+
+snippet logit
+    /* https://mc-stan.org/docs/stan-users-guide/logistic-probit-regression.html */
+    data {
+      int<lower=0> N;
+      vector[N] x;
+      array[N] int<lower=0, upper=1> y;
+    }
+    parameters {
+      real alpha;
+      real beta;
+    }
+    model {
+      y ~ bernoulli_logit(alpha + beta * x);
+    }
+
+snippet linreg multi hier
+    /* https://mc-stan.org/docs/stan-users-guide/multivariate-hierarchical-priors.html */
+    data {
+      int<lower=0> N;              // num individuals
+      int<lower=1> K;              // num ind predictors
+      int<lower=1> J;              // num groups
+      int<lower=1> L;              // num group predictors
+      array[N] int<lower=1, upper=J> jj;  // group for individual
+      matrix[N, K] x;              // individual predictors
+      array[J] row_vector[L] u;    // group predictors
+      vector[N] y;                 // outcomes
+    }
+    parameters {
+      corr_matrix[K] Omega;        // prior correlation
+      vector<lower=0>[K] tau;      // prior scale
+      matrix[L, K] gamma;          // group coeffs
+      array[J] vector[K] beta;     // indiv coeffs by group
+      real<lower=0> sigma;         // prediction error scale
+    }
+    model {
+      tau ~ cauchy(0, 2.5);
+      Omega ~ lkj_corr(2);
+      to_vector(gamma) ~ normal(0, 5);
+      {
+        array[J] row_vector[K] u_gamma;
+        for (j in 1:J) {
+          u_gamma[j] = u[j] * gamma; // group coeffs predict each group's prior center
+        }
+        beta ~ multi_normal(u_gamma, quad_form_diag(Omega, tau)); // indiv coeffs drawn from group-specific multivar prior
+      }
+      for (n in 1:N) {
+        y[n] ~ normal(x[n] * beta[jj[n]], sigma);
+      }
+    }   
+
+
+snippet linreg fastqr
+    /* https://mc-stan.org/docs/stan-users-guide/QR-reparameterization.html
+        Key insight:
+        
+        In y ~ N(x*beta, sigma), x*beta = Q*R*beta where Q*R is the QR decomp of X.
+
+        MCMC on the QR decomp is faster (if K>1 and beta has a flat prior) b/c:
+        - Q cols are orthogonal
+        - Q cols are unit-scale
+        I.e., avoids the "funnel of doom".
+    */
+    data {
+      int<lower=0> N;   // number of data items
+      int<lower=0> K;   // number of predictors
+      matrix[N, K] x;   // predictor matrix
+      vector[N] y;      // outcome vector
+    }
+    transformed data {
+      matrix[N, K] Q_ast;
+      matrix[K, K] R_ast;
+      matrix[K, K] R_ast_inverse;
+      // thin and scale the QR decomposition
+      Q_ast = qr_thin_Q(x) * sqrt(N - 1);
+      R_ast = qr_thin_R(x) / sqrt(N - 1);
+      R_ast_inverse = inverse(R_ast);
+    }
+    parameters {
+      real alpha;           // intercept
+      vector[K] theta;      // coefficients on Q_ast
+      real<lower=0> sigma;  // error scale
+    }
+    model {
+      y ~ normal(Q_ast * theta + alpha, sigma);  // likelihood
+    }
+    generated quantities {
+      vector[K] beta;
+      beta = R_ast_inverse * theta; // coefficients on x
+    }
+
+snippet linreg
+    /* https://mc-stan.org/docs/stan-users-guide/linear-regression.html */
+    data {
+      int<lower=1> N;
+      vector[N] y;
+      vector[N] x;
+    }
+    parameters {
+      real alpha;
+      real beta;
+      real<lower=0> sigma;
+    }
+    model {
+      // priors
+      alpha ~ normal(0, 10);
+      beta ~ normal(0, 10);
+      sigma ~ cauchy(0, 2.5); 
+
+      // model
+      y ~ normal(x * beta + alpha, sigma);
+    }
+
+##-------------------------------------
+## DEMOS
+##-------------------------------------
+
+snippet eightschools2
+    /* Note: this is still compatible with Stan 3 */
+    data {
+        int<lower=0> J;         // number of schools
+        real y[J];              // estimated treatment effects
+        real<lower=0> sigma[J]; // s.e. of effect estimates
+    }
+    parameters {
+        real mu;
+        real<lower=0> tau;
+        real eta[J];
+    }
+    transformed parameters {
+        real theta[J];
+        for (j in 1:J)
+        theta[j] = mu + tau * eta[j];
+    }
+    model {
+        eta ~ normal(0, 1);
+        y ~ normal(theta, sigma);
+    }
+
+snippet eightschools
+    data {
+      int<lower=0> J;         // number of schools
+      real y[J];              // estimated treatment effects
+      real<lower=0> sigma[J]; // standard error of effect estimates
+    }
+    parameters {
+      real mu;                // population treatment effect
+      real<lower=0> tau;      // standard deviation in treatment effects
+      vector[J] eta;          // unscaled deviation from mu by school
+    }
+    transformed parameters {
+      vector[J] theta = mu + tau * eta;        // school treatment effects
+    }
+    model {
+      target += normal_lpdf(eta | 0, 1);       // prior log-density
+      target += normal_lpdf(y | theta, sigma); // log-likelihood
+    }
+
+##-------------------------------------
 ## DEFAULT
 ##-------------------------------------
 
 snippet for
-	for (${1:var} in ${2:start}:${3:end}) {
-	  ${0}
-	}
+    for (${1:var} in ${2:start}:${3:end}) {
+      ${0}
+    }
 
 snippet if
-	if (${1:condition}) {
-	  ${0}
-	}
+    if (${1:condition}) {
+      ${0}
+    }
 
 snippet el
-	else (${1:condition}) {
-	  ${0}
-	}
+    else (${1:condition}) {
+      ${0}
+    }
 
 snippet ei
-	else if (${1:condition}) {
-	  ${0}
-	}
+    else if (${1:condition}) {
+      ${0}
+    }
 
 snippet <l
-	<lower = ${1:expression}>${0}
+    <lower = ${1:expression}>${0}
 
 snippet <u
-	<upper = ${1:expression}>${0}
+    <upper = ${1:expression}>${0}
 
 snippet <lu
-	<lower = ${1:expression}, upper = ${2:expression}>${0}
+    <lower = ${1:expression}, upper = ${2:expression}>${0}
 
 snippet while
-	while (${1:condition}) {
-	  ${0}
-	}
+    while (${1:condition}) {
+      ${0}
+    }
 
 snippet gen
-	generated quantities {
-	  ${0}
-	}
+    generated quantities {
+      ${0}
+    }
 
 snippet mdl
-	model {
-	  ${0}
-	}
+    model {
+      ${0}
+    }
 
 snippet par
-	parameters {
-	  ${0}
-	}
+    parameters {
+      ${0}
+    }
 
 snippet tpar
-	transformed parameters {
-	  ${0}
-	}
+    transformed parameters {
+      ${0}
+    }
 
 snippet data
-	data {
-	  ${0}
-	}
+    data {
+      ${0}
+    }
 
 snippet tdata
-	transformed data {
-	  ${0}
-	}
+    transformed data {
+      ${0}
+    }
 
 snippet ode
-	integrate_ode(${1:function}, ${2:y0}, ${3:t0}, ${4:t}, ${5:theta}, ${6:x_r}, ${7:x_i});
+    integrate_ode(${1:function}, ${2:y0}, ${3:t0}, ${4:t}, ${5:theta}, ${6:x_r}, ${7:x_i});
 
 snippet funs
-	functions {
-	  ${0}
-	}
+    functions {
+      ${0}
+    }
 
 snippet fun
-	${1:return} ${2:name} (${3:args}) {
-	  ${0}
-	}
+    ${1:return} ${2:name} (${3:args}) {
+      ${0}
+    }

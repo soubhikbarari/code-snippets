@@ -36,7 +36,7 @@ import time
 
 SUBLIME_SOURCE_VALUES_TO_R_SNIPPET_FILES = {
     "source.python" : ["python.snippets"],
-    "source.stan" : ["stan.snippets"],    
+    "source.stan" : ["stan.snippets"],
     "source.r" : ["r.snippets"],
     "text.tex.latex" : ["tex.snippets"],
     "text.tex" : ["tex.snippets"]
