@@ -11,6 +11,9 @@ snippet pd chunk
 ## TIDYVERSE
 ##-------------------------------------
 
+snippet as_factor
+	pd.Categorical(df["col"], categories=["No", "Yes"], ordered=True)
+
 snippet left_join
 	df_c = df_a \
 		.merge(df_b, how = "left", on = "x")
@@ -88,6 +91,33 @@ snippet mpl header
 ##-------------------------------------
 ## ML
 ##-------------------------------------
+
+def code_interaction_variables(X, interactions):
+    """ Code specified interaction terms.
+
+        X: dummied version of a dataframe
+        interactions: either list of variable tuples or list of R-style interaction term strings
+    """
+    if type(interactions) == str:
+        interactions = [interactions]
+    elif type(interactions) == list or type(interactions) == tuple:
+        if type(interactions[0]) != list and type(interactions[0]) != tuple:
+            interactions = [interactions]
+
+    for x_x in interactions:
+        if type(x_x) == str:
+            x_x = x_x.split(":")
+            x_x = [x for x in x_x if x in X.columns]
+        elif type(x_x) == tuple or type(x_x) == list:
+            x_x = [x for x in x_x if x in X.columns]
+        x_x_col = ":".join(x_x)
+        X[x_x_col] = 1
+        for x_col in x_x:
+            X[x_x_col] *= X[x_col]
+    return(X)
+
+snippet onehot
+	pd.get_dummies(df, drop_first = "True").replace({False: 0, True: 1})
 
 snippet skl mkclfdat
 	from sklearn.datasets import make_classification
