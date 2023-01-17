@@ -252,6 +252,55 @@ snippet skl linreg
 ## BAYESIAN
 ##-------------------------------------
 
+snippet cmdstanpy mcmc
+	## https://cmdstanpy.readthedocs.io/en/stable-0.9.65/sample.html
+	import os
+	from cmdstanpy import cmdstan_path, CmdStanModel
+	bernoulli_stan = os.path.join(cmdstan_path(), 'examples', 'bernoulli', 'bernoulli.stan')
+	bernoulli_data = os.path.join(cmdstan_path(), 'examples', 'bernoulli', 'bernoulli.data.json')
+
+	# instantiate, compile bernoulli model
+	bernoulli_model = CmdStanModel(stan_file=bernoulli_stan)
+
+	# run the NUTS-HMC sampler
+	bern_fit = bernoulli_model.sample(data=bernoulli_data)
+	bern_fit.draws().shape
+	bern_fit.summary()	
+
+snippet cmdstanpy mle
+	## https://cmdstanpy.readthedocs.io/en/stable-0.9.65/optimize.html
+	import os
+	from cmdstanpy.model import CmdStanModel
+	from cmdstanpy.utils import cmdstan_path
+
+	# instantiate, compile bernoulli model
+	bernoulli_path = os.path.join(cmdstan_path(), 'examples', 'bernoulli', 'bernoulli.stan')
+	bernoulli_model = CmdStanModel(stan_file=bernoulli_path)
+
+	# run CmdStan's optimize method, returns object `CmdStanMLE`
+	bern_data = os.path.join(cmdstan_path(), 'examples', 'bernoulli', 'bernoulli.data.json')
+	bern_mle = bernoulli_model.optimize(data=bernoulli_data)
+	print(bern_mle.column_names)
+	print(bern_mle.optimized_params_dict)
+
+snippet cmdstanpy vb
+	## https://cmdstanpy.readthedocs.io/en/stable-0.9.65/variational_bayes.html
+	import os
+	from cmdstanpy.model import CmdStanModel
+	from cmdstanpy.utils import cmdstan_path
+
+	# instantiate, compile bernoulli model
+	bernoulli_path = os.path.join(cmdstan_path(), 'examples', 'bernoulli', 'bernoulli.stan')
+	bernoulli_model = CmdStanModel(stan_file=bernoulli_path)
+
+	# run CmdStan's variational inference method, returns object `CmdStanVB`
+	bern_data = os.path.join(cmdstan_path(), 'examples', 'bernoulli', 'bernoulli.data.json')
+	bern_vb = bernoulli_model.variational(data=bern_data)
+	print(bern_vb.column_names)
+	print(bern_vb.variational_params_dict)
+	bern_vb.variational_sample.shape
+
+
 snippet pystan ex
 	import stan
 	
