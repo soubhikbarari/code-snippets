@@ -89,6 +89,48 @@ snippet mpl header
 	import matplotlib.pyplot as plt
 
 ##-------------------------------------
+## GLM
+##-------------------------------------
+
+snippet statsmodels mixedlogit
+	## https://www.statsmodels.org/stable/generated/statsmodels.genmod.bayes_mixed_glm.BinomialBayesMixedGLM.html#statsmodels.genmod.bayes_mixed_glm.BinomialBayesMixedGLM
+
+	# A binomial (logistic) random effects model with random intercepts for villages and random slopes for each year within each village:
+	random = {"a": '0 + C(Village)', "b": '0 + C(Village)*year_cen'}
+	model = BinomialBayesMixedGLM.from_formula('y ~ year_cen', random, data)
+	result = model.fit_vb()
+
+snippet statsmodels glm
+	## https://www.statsmodels.org/stable/glm.html
+	import statsmodels.api as sm
+	
+	data = sm.datasets.scotland.load()
+	data.exog = sm.add_constant(data.exog)
+
+	# Instantiate a gamma family model with the default link function.
+	gamma_model = sm.GLM(data.endog, data.exog, family=sm.families.Gamma())
+
+	gamma_results = gamma_model.fit()
+	print(gamma_results.summary())
+
+snippet statsmodels linreg
+	## https://www.statsmodels.org/stable/index.html
+	import numpy as np
+	import statsmodels.api as sm
+	import statsmodels.formula.api as smf
+
+	# Load data
+	dat = sm.datasets.get_rdataset("Guerry", "HistData").data
+
+	# Fit regression model (using the natural log of one of the regressors)
+	results = smf.ols('Lottery ~ Literacy + np.log(Pop1831)', data=dat).fit()
+
+	# Inspect the results
+	print(results.summary())
+
+
+
+##-------------------------------------
 ## ML
 ##-------------------------------------
 
@@ -119,7 +161,7 @@ def code_interaction_variables(X, interactions):
 snippet onehot
 	pd.get_dummies(df, drop_first = "True").replace({False: 0, True: 1})
 
-snippet skl mkclfdat
+snippet sklearn mkclfdat
 	from sklearn.datasets import make_classification
 	
 	X, y = make_classification(
@@ -134,7 +176,7 @@ snippet skl mkclfdat
 	    random_state=0,
 	)
 
-snippet skl gmm
+snippet sklearn gmm
 	import numpy as np
 	import matplotlib.pyplot as plt
 	from matplotlib.colors import LogNorm
@@ -177,7 +219,7 @@ snippet skl gmm
 	plt.axis("tight")
 	plt.show()
 
-snippet skl stack
+snippet sklearn stack
 	from sklearn.ensemble import StackingRegressor
 	from sklearn.linear_model import RidgeCV
 	
@@ -190,7 +232,7 @@ snippet skl stack
 	stacking_regressor = StackingRegressor(estimators=estimators, final_estimator=RidgeCV())
 	stacking_regressor
 
-snippet skl preproc
+snippet sklearn preproc
 	from sklearn.preprocessing import OneHotEncoder
 	from sklearn.preprocessing import StandardScaler
 	
@@ -204,7 +246,7 @@ snippet skl preproc
 	)
 	linear_preprocessor
 
-snippet skl logit
+snippet sklearn logit
 	from sklearn.datasets import load_iris
 	from sklearn.linear_model import LogisticRegression
 	
@@ -220,7 +262,7 @@ snippet skl logit
 	clf.predict_proba(X[:2, :])
 	clf.score(X, y)
 
-snippet skl linreg
+snippet sklearn linreg
 	from sklearn import linear_model
 	import numpy as np
 	
@@ -693,7 +735,7 @@ snippet import ml
 	import pandas as pd
 	import sklearn as skl
 	import statsmodels.api as sm
-	import stan
+	import cmdstanpy
 
 snippet cache
 	import pickle
