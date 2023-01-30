@@ -11,6 +11,9 @@ snippet pd chunk
 ## TIDYVERSE
 ##-------------------------------------
 
+snippet gather
+	pd.melt(df, id_vars="A", value_vars="B")
+
 snippet as_factor
 	pd.Categorical(df["col"], categories=["No", "Yes"], ordered=True)
 
@@ -189,15 +192,18 @@ snippet sklearn classif simple
 
 	clf = svm.SVC(kernel='linear', C=1).fit(X_train, y_train)
 	clf.score(X_test, y_test)
+	cross_val_score(clf, X, y, cv=5)
 
 	clf = DecisionTreeClassifier().fit(X_train, y_train)
 	clf.score(X_test, y_test)
 
 	clf = RandomForestClassifier(max_depth=2, random_state=0).fit(X_train, y_train)
 	clf.score(X_test, y_test)
+	cross_val_score(clf, X, y, cv=5)
 
 	clf = LogisticRegression(penalty="l1", C=1).fit(X, y)
-	clf.score(X_test, y_test)	
+	clf.score(X_test, y_test)
+	cross_val_score(clf, X, y, cv=5)
 
 snippet sklearn classif data
 	from sklearn.datasets import make_classification
