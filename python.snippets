@@ -11,6 +11,16 @@ snippet pd chunk
 ## TIDYVERSE
 ##-------------------------------------
 
+snippet summarise
+	## one var, one summary func
+	df.groupby("group_var")["outcome_var"].mean()
+	## one var, many summary funcs
+	df.groupby("group_var").agg(["sum","count"])
+	## multiple vars, single summary func (over row as series)
+	df.groupby("group_var").agg(lambda row: "|".join(row.tolist()))
+	## multiple vars, multiple summary funcs
+	df.groupby("group_var").agg({"A":"sum", "B": lambda x: len(x.unique().tolist())})
+
 snippet gather
 	pd.melt(df, id_vars="A", value_vars="B")
 
